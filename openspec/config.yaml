@@ -1,0 +1,67 @@
+schema: spec-driven
+
+context: |
+  Escreva os artefatos em português brasileiro e use termos claros para lojistas.
+  Siga better-writing para interface e documentação: use vocabulário consistente, frases claras em pt-BR, rótulos de ação iniciados por verbo e erros com próximo passo.
+  Links devem descrever o destino. Faça promessas proporcionais à evidência e explique limites de importação e compatibilidade com ERPs.
+  Produto: ferramenta independente para preparar planilhas antes de importações de produtos.
+  Stack prevista: Next.js App Router, React, TypeScript strict, Tailwind CSS e shadcn/ui. Confirme a estrutura real antes de alterar dependências ou convenções.
+  Use Prettier com semi: false; evite regras de estilo do ESLint que dupliquem ou conflitem com Prettier.
+  Use componentes shadcn/ui como base reutilizável. Personalize identidade visual por tokens semânticos e variantes, mantendo composição acessível e evitando cores avulsas.
+  Em React, prefira composição explícita a componentes com muitos boolean props; em TypeScript, mantenha strict e valide dados externos em runtime.
+  Comece com Server Components nas páginas públicas e use Client Components apenas para interação que exige APIs do navegador.
+  MVP sem backend, API, Route Handlers ou Server Actions. Só proponha rede/backend numa change que justifique necessidade, dados envolvidos e impacto na privacidade.
+  Processamento de planilhas deve ocorrer no navegador; não envie conteúdo de arquivos a servidores, logs ou analytics.
+  Não alegue parceria, certificação ou aceitação garantida por ERP algum.
+  O perfil Bling é experimental. Só inclua regras específicas após confirmar documentação oficial vigente e cobri-las com fixtures.
+  Preserve dados e colunas não mapeadas. SKU, GTIN, preços, estoques e campos fiscais nunca mudam sem seleção e prévia explícitas.
+  Correções devem ser opt-in, reversíveis quando possível, e não podem descartar dados silenciosamente.
+  Estrutura inicial sugerida, sem criar diretórios vazios: src/app para rotas e metadados; src/components para UI compartilhada; src/domain/validation e src/domain/profiles para regras puras; src/lib/parsers e src/lib/export para formatos; src/workers para tarefas pesadas; tests/unit, tests/e2e e tests/fixtures para testes e dados fictícios.
+  A estrutura é um ponto de partida. Cada change deve propor só arquivos e módulos necessários e manter cada módulo com uma responsabilidade clara.
+  Alvo de acessibilidade: WCAG 2.2 nível AA, com verificação automatizada e manual; não declarar conformidade total sem auditoria adequada.
+  Teste layouts, fluxos por teclado e toque em larguras mobile e desktop. SEO se aplica às páginas públicas; dados estruturados devem descrever apenas fatos verificáveis.
+
+rules:
+  proposal:
+    - Declare problema, usuários, resultado esperado, escopo e itens fora de escopo.
+    - Não prometa compatibilidade universal nem aceite garantido por ERP.
+    - "Preserve o escopo do MVP: sem autenticação, cobrança, banco de dados de usuários ou integração com ERP, salvo decisão explícita numa change."
+  specs:
+    - Escreva requisitos observáveis e cenários com resultados verificáveis.
+    - Cubra arquivos inválidos, limites, erros e preservação dos dados originais quando forem relevantes.
+    - Separe validações genéricas de regras específicas de qualquer ERP.
+  design:
+    - Mantenha regras de domínio independentes da interface e de bibliotecas de parsing/exportação.
+    - Avalie licença, manutenção e riscos de segurança antes de adicionar dependências.
+    - Prefira componentes shadcn/ui existentes e composição de componentes antes de criar marcação customizada; revise o código-fonte adicionado e sua acessibilidade.
+    - Use variantes existentes e tokens semânticos do tema para personalização; use Tailwind para layout e evite cores ou tipografia avulsas por componente.
+    - Explique como a solução mantém processamento local e evita bloquear a interface em arquivos grandes.
+    - "Trate células e arquivos importados como entrada não confiável: renderize como texto, não execute fórmulas/macros nem injete conteúdo em HTML."
+    - Valide tipo e limites de arquivos para orientar a pessoa; mantenha dados locais e não crie preview de HTML/SVG ativo.
+    - Mantenha lockfile e avalie alertas e scripts de instalação de dependências antes de adotá-las.
+    - Antes de criar ou mover arquivos, descreva a estrutura proposta e justifique novos módulos; não crie camadas ou abstrações sem necessidade concreta.
+    - Use parsing em Web Worker para arquivos grandes quando necessário e carregue dependências pesadas, como suporte a XLSX, sob demanda quando possível.
+    - Defina como medir Core Web Vitals e uso de memória nos fluxos afetados; evite metas numéricas sem baseline medido.
+    - Inclua semântica HTML, navegação por teclado, foco visível, contraste, nomes acessíveis, mensagens anunciáveis e respeito a prefers-reduced-motion.
+    - Projete interfaces responsivas para toque e ponteiro, sem rolagem horizontal desnecessária em mobile.
+    - Para páginas públicas, defina title, description, canonical quando houver domínio, Open Graph, sitemap e robots conforme indexabilidade real.
+    - Use Schema.org em JSON-LD somente quando ajudar a descrever conteúdo público; escolha tipos e propriedades sustentados pelo conteúdo visível e escape dados serializados com segurança.
+    - Não adicione endpoints, chamadas externas ou coleta de dados ao MVP sem mudança aprovada que explique finalidade e privacidade.
+  tasks:
+    - Vincule cada tarefa a requisito ou decisão dos artefatos da change.
+    - Use Vitest para regras puras, parsing, exportação e casos adversariais; inclua fixtures pequenas e fictícias.
+    - Use Playwright Test para fluxos E2E críticos, upload/download, erros e viewports relevantes; prefira locators semânticos e assertions com auto-wait.
+    - Use o MCP Playwright como revisão interativa complementar de fluxos, snapshot de acessibilidade, responsividade, console e requisições de rede; não o trate como substituto da suíte automatizada.
+    - Inclua testes para regras, casos adversariais e critérios de aceite afetados.
+    - Inclua revisão de privacidade quando houver parsing, exportação, telemetria ou rede.
+    - Cubra WCAG 2.2 AA nos fluxos alterados com verificações automatizadas e revisão manual; registre limitações conhecidas.
+    - Verifique metadata, indexabilidade e JSON-LD nas páginas públicas alteradas; não invente avaliações, preços ou compatibilidade.
+operations:
+  apply:
+    guidance:
+      - Siga os critérios de aceite da change e rode verificações relevantes já definidas pelo projeto.
+      - Confirme que arquivos do usuário não são transmitidos e que exportações protegem contra formula injection quando esses fluxos forem alterados.
+      - Revise rendering de dados não confiáveis, limites de arquivos e novas dependências nas mudanças que toquem esses fluxos.
+      - Use Playwright Test para os fluxos E2E definidos e o MCP Playwright para revisar interação, árvore de acessibilidade, responsividade e rede no navegador quando disponível.
+      - Inspecione páginas públicas em mobile e desktop e confirme metadados e JSON-LD factual quando a change afetar SEO.
+      - Informe verificações executadas, resultados e limitações; não declare compatibilidade com ERP sem evidência oficial vigente.

@@ -1,0 +1,33 @@
+import type { Metadata } from "next"
+import type { ReactNode } from "react"
+import { siteUrl } from "@/lib/site-url"
+import "./globals.css"
+
+const title = "LoteFlow — Preparação de planilhas de produtos"
+const description =
+  "Estamos construindo uma ferramenta para ajudar lojistas a preparar planilhas de produtos antes da importação."
+
+export const metadata: Metadata = {
+  ...(siteUrl ? { metadataBase: siteUrl, alternates: { canonical: "/" } } : {}),
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    locale: "pt_BR",
+    siteName: "LoteFlow",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+}
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="pt-BR" className="h-full antialiased">
+      <body className="flex min-h-full flex-col">{children}</body>
+    </html>
+  )
+}
