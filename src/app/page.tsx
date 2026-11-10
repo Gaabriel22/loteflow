@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { SampleDemo } from "@/components/sample-demo"
 
 export default function Home() {
   return (
@@ -42,17 +43,16 @@ export default function Home() {
               Mais clareza ao preparar planilhas de produtos.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
-              Estamos construindo uma ferramenta para ajudar lojistas a preparar
-              planilhas de produtos antes da importação. A análise de arquivos
-              ainda não está disponível.
+              Experimente validações genéricas com produtos fictícios. A leitura
+              de arquivos CSV e XLSX ainda está em construção.
             </p>
             <div className="mt-8">
               <Button
                 nativeButton={false}
-                render={<a href="#privacidade" role="link" />}
+                render={<a href="#demonstracao" role="link" />}
                 size="lg"
               >
-                Conheça os princípios de privacidade
+                Testar gratuitamente
               </Button>
             </div>
           </div>
@@ -68,16 +68,16 @@ export default function Home() {
             />
             <CardHeader className="relative border-b border-border/70 pb-5">
               <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                Uma base em construção
+                Dados de exemplo
               </p>
               <CardTitle className="mt-2 font-serif text-2xl font-medium tracking-tight">
                 <h2 className="font-inherit text-inherit">
-                  O próximo passo, com cuidado.
+                  Comece sem enviar arquivos.
                 </h2>
               </CardTitle>
               <CardDescription className="text-sm leading-6">
-                A experiência será definida em etapas, com clareza sobre cada
-                mudança feita nos dados.
+                Veja como a ferramenta aponta inconsistências em uma amostra
+                local e fictícia.
               </CardDescription>
             </CardHeader>
             <CardContent className="relative grid gap-4 pt-5">
@@ -87,7 +87,7 @@ export default function Home() {
                   className="mt-2 size-2 shrink-0 rounded-full bg-primary"
                 />
                 <p className="text-sm leading-6 text-muted-foreground">
-                  Revisar problemas antes de preparar uma planilha.
+                  Identificar campos que precisam de revisão.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -96,7 +96,7 @@ export default function Home() {
                   className="mt-2 size-2 shrink-0 rounded-full bg-primary/40"
                 />
                 <p className="text-sm leading-6 text-muted-foreground">
-                  Preservar dados e colunas que não forem mapeados.
+                  Conferir cada apontamento por linha e coluna.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -105,12 +105,14 @@ export default function Home() {
                   className="mt-2 size-2 shrink-0 rounded-full bg-primary/20"
                 />
                 <p className="text-sm leading-6 text-muted-foreground">
-                  Explicar alterações antes de aplicá-las.
+                  Conhecer validações sem regras de ERP.
                 </p>
               </div>
             </CardContent>
           </Card>
         </section>
+
+        <SampleDemo />
 
         <section
           aria-labelledby="privacy-title"
@@ -122,12 +124,12 @@ export default function Home() {
               className="font-serif text-2xl font-medium tracking-tight sm:text-3xl"
               id="privacy-title"
             >
-              Privacidade desde a fundação
+              Privacidade desde o início
             </h2>
             <p className="max-w-2xl leading-7 text-muted-foreground">
-              O projeto prevê que o processamento de planilhas aconteça no seu
-              navegador. Nenhum arquivo pode ser enviado ou analisado nesta
-              versão inicial.
+              Esta demonstração usa apenas dados fictícios. Arquivos reais ainda
+              não são analisados nem enviados. O processamento de planilhas
+              previsto para o produto deve acontecer no navegador.
             </p>
           </div>
         </section>
@@ -136,7 +138,7 @@ export default function Home() {
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p>LoteFlow · projeto em construção</p>
-          <p>Sem upload ou análise de arquivos nesta versão.</p>
+          <p>Upload de arquivos ainda não está disponível.</p>
         </div>
       </footer>
     </>

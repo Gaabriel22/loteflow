@@ -24,16 +24,25 @@ test("página inicial informa o estado do produto em telas desktop e mobile", as
       }),
     ).toBeVisible()
     await expect(
-      page.getByText(/a análise de arquivos ainda não está disponível/i),
+      page.getByText(
+        /leitura de arquivos CSV e XLSX ainda está em construção/i,
+      ),
     ).toBeVisible()
     await expect(
-      page.getByRole("link", { name: /conheça os princípios de privacidade/i }),
+      page.getByRole("link", { name: /testar gratuitamente/i }),
     ).toBeVisible()
     await expect(page).toHaveTitle(/LoteFlow/)
     await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
       "content",
       /LoteFlow/,
     )
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      "content",
+      /amostra fictícia/,
+    )
+    await expect(
+      page.locator('meta[property="og:description"]'),
+    ).toHaveAttribute("content", /amostra fictícia/)
 
     const pageWidth = await page
       .locator("body")
@@ -65,10 +74,12 @@ test("página inicial informa o estado do produto em telas desktop e mobile", as
     .toBe("auto")
   const transitionDurations = await page
     .locator('[data-slot="button"]')
-    .evaluate((element) =>
-      getComputedStyle(element)
-        .transitionDuration.split(",")
-        .map((duration) => Number.parseFloat(duration)),
+    .evaluateAll((elements) =>
+      elements.flatMap((element) =>
+        getComputedStyle(element)
+          .transitionDuration.split(",")
+          .map((duration) => Number.parseFloat(duration)),
+      ),
     )
   expect(transitionDurations.every((duration) => duration <= 0.00001)).toBe(
     true,
