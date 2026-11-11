@@ -5,13 +5,22 @@ import { cn } from "cn"
 
 type TableProps = React.ComponentProps<"table"> & {
   containerAriaLabel?: string
+  containerClassName?: string
 }
 
-function Table({ className, containerAriaLabel, ...props }: TableProps) {
+function Table({
+  className,
+  containerAriaLabel,
+  containerClassName,
+  ...props
+}: TableProps) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className={cn(
+        "relative w-full overflow-x-auto focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+        containerClassName,
+      )}
       role={containerAriaLabel ? "region" : undefined}
       tabIndex={containerAriaLabel ? 0 : undefined}
       aria-label={containerAriaLabel}

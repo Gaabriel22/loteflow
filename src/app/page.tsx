@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { CsvImport } from "@/components/csv-import"
 import {
   Card,
   CardContent,
@@ -43,8 +44,9 @@ export default function Home() {
               Mais clareza ao preparar planilhas de produtos.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
-              Experimente validações genéricas com produtos fictícios. A leitura
-              de arquivos CSV e XLSX ainda está em construção.
+              Experimente validações genéricas com dados fictícios ou consulte
+              uma prévia local de arquivos CSV. O mapeamento e a análise de
+              arquivos ainda estão em construção.
             </p>
             <div className="mt-8">
               <Button
@@ -113,6 +115,7 @@ export default function Home() {
         </section>
 
         <SampleDemo />
+        <CsvImport />
 
         <section
           aria-labelledby="privacy-title"
@@ -127,9 +130,10 @@ export default function Home() {
               Privacidade desde o início
             </h2>
             <p className="max-w-2xl leading-7 text-muted-foreground">
-              Esta demonstração usa apenas dados fictícios. Arquivos reais ainda
-              não são analisados nem enviados. O processamento de planilhas
-              previsto para o produto deve acontecer no navegador.
+              A demonstração usa dados fictícios. Arquivos CSV selecionados são
+              lidos no navegador para gerar uma prévia, sem envio ou
+              armazenamento. O mapeamento e a análise de produtos ainda não
+              estão disponíveis.
             </p>
           </div>
         </section>
@@ -138,7 +142,7 @@ export default function Home() {
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p>LoteFlow · projeto em construção</p>
-          <p>Upload de arquivos ainda não está disponível.</p>
+          <p>Prévia CSV local. Mapeamento e análise ainda em construção.</p>
         </div>
       </footer>
     </>

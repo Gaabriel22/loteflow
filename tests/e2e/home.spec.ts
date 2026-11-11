@@ -23,13 +23,15 @@ test("página inicial informa o estado do produto em telas desktop e mobile", as
         name: /mais clareza ao preparar planilhas/i,
       }),
     ).toBeVisible()
-    await expect(
-      page.getByText(
-        /leitura de arquivos CSV e XLSX ainda está em construção/i,
-      ),
-    ).toBeVisible()
+    await expect(page.getByText(/prévia local de arquivos CSV/i)).toBeVisible()
     await expect(
       page.getByRole("link", { name: /testar gratuitamente/i }),
+    ).toBeVisible()
+    await expect(
+      page.getByRole("heading", {
+        level: 2,
+        name: /consulte seu arquivo CSV/i,
+      }),
     ).toBeVisible()
     await expect(page).toHaveTitle(/LoteFlow/)
     await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
@@ -38,11 +40,11 @@ test("página inicial informa o estado do produto em telas desktop e mobile", as
     )
     await expect(page.locator('meta[name="description"]')).toHaveAttribute(
       "content",
-      /amostra fictícia/,
+      /prévia local de CSV/,
     )
     await expect(
       page.locator('meta[property="og:description"]'),
-    ).toHaveAttribute("content", /amostra fictícia/)
+    ).toHaveAttribute("content", /prévia local de CSV/)
 
     const pageWidth = await page
       .locator("body")

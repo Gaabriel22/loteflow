@@ -5,7 +5,7 @@ import "./globals.css"
 
 const title = "LoteFlow — Preparação de planilhas de produtos"
 const description =
-  "Experimente validações genéricas com uma amostra fictícia. A leitura e análise de arquivos ainda está em desenvolvimento."
+  "Experimente validações genéricas com dados fictícios e consulte uma prévia local de CSV. Mapeamento e análise ainda estão em desenvolvimento."
 
 export const metadata: Metadata = {
   ...(siteUrl ? { metadataBase: siteUrl, alternates: { canonical: "/" } } : {}),

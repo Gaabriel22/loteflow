@@ -20,9 +20,13 @@ test("carrega a demonstração fictícia sem enviar dados", async ({ page }) => 
   await page.getByRole("button", { name: "Carregar exemplo" }).focus()
   await page.keyboard.press("Enter")
 
-  await expect(page.getByRole("status")).toHaveText(
-    "22 linhas fictícias analisadas. 7 apontamentos em 6 linhas.",
-  )
+  await expect(
+    page
+      .getByRole("region", {
+        name: "Veja problemas antes de preparar a planilha.",
+      })
+      .getByRole("status"),
+  ).toHaveText("22 linhas fictícias analisadas. 7 apontamentos em 6 linhas.")
   await expect(page.getByRole("table")).toBeVisible()
   await expect(page.getByRole("row")).toHaveCount(7)
   await expect(page.getByRole("columnheader", { name: "SKU" })).toBeVisible()

@@ -1,6 +1,6 @@
 # LoteFlow
 
-Fundação inicial de uma ferramenta para ajudar lojistas a preparar planilhas de produtos antes da importação. A marca é provisória. A página informa o estado atual: upload e análise de arquivos ainda não existem.
+Ferramenta em construção para ajudar lojistas a preparar planilhas de produtos antes da importação. A página oferece uma demonstração fictícia e uma prévia local de CSV; mapeamento e análise de produtos ainda não estão disponíveis.
 
 ## Requisitos
 
@@ -35,12 +35,13 @@ npx playwright install chromium
 ## Estrutura
 
 - `src/app/`: página, layout, metadados, robots e sitemap.
-- `src/components/ui/`: componentes shadcn/ui usados pelo shell.
+- `src/components/ui/`: componentes shadcn/ui usados pela interface.
+- `src/lib/parsers/`: leitura local de CSV.
 - `src/lib/`: utilitários compartilhados.
 - `tests/unit/`: testes de funções puras.
 - `tests/e2e/`: smoke test responsivo e varredura axe.
 
-As pastas de domínio, parsing, exportação e workers entram quando uma change implementar esses fluxos.
+As pastas de domínio, exportação e workers entram quando uma change implementar esses fluxos.
 
 Os componentes locais foram gerados com shadcn CLI `4.23.0`; o código está versionado em `src/components/ui/`. O CLI não fica como dependência instalada, pois não é necessário para executar a aplicação.
 
@@ -50,7 +51,7 @@ Build de produção em 2026-11-09: rota `/` estática; `.next/static` gerou 12 a
 
 ## Arquitetura e privacidade
 
-As páginas públicas começam como Server Components. Não há API, backend, banco, analytics ou upload. A futura análise de planilhas deve ocorrer no navegador; arquivos e seu conteúdo não devem ser enviados a servidores, logs ou analytics. Células são dados não confiáveis. Renderize-as como texto e nunca execute fórmulas/macros ou injete HTML/SVG.
+As páginas públicas começam como Server Components. Não há API, backend, banco, analytics ou upload remoto. A prévia CSV é processada no navegador; arquivos e conteúdo não são enviados a servidores, logs ou analytics. A leitura aceita CSV UTF-8 de até 10 MiB e 100 colunas, e mostra até 100 registros. Células são dados não confiáveis. Renderize-as como texto e nunca execute fórmulas/macros ou injete HTML/SVG.
 
 ## SEO e conteúdo
 
@@ -58,4 +59,4 @@ Metadados, Open Graph, robots e sitemap descrevem apenas a página pública atua
 
 ## Limites desta fundação
 
-Não há análise CSV/XLSX, demonstração funcional, regras de ERP, perfil Bling, correções, exportação ou promessa de compatibilidade. A auditoria axe não comprova conformidade WCAG 2.2 AA; ela complementa testes por teclado e revisão manual.
+Não há mapeamento de colunas, validação de arquivos reais, leitura XLSX, regras de ERP, perfil Bling, correções, exportação ou promessa de compatibilidade. A auditoria axe não comprova conformidade WCAG 2.2 AA; ela complementa testes por teclado e revisão manual.

@@ -39,3 +39,26 @@ test("demonstração carregada não tem violações WCAG 2.2 A/AA detectáveis p
 
   expect(results.violations).toEqual([])
 })
+
+test("prévia CSV não tem violações WCAG 2.2 A/AA detectáveis por axe", async ({
+  page,
+}) => {
+  await page.goto("/#importar-csv")
+  await page
+    .getByLabel("Arquivo CSV", { exact: true })
+    .setInputFiles("tests/fixtures/produtos.csv")
+  await expect(page.getByRole("table")).toBeVisible()
+
+  const results = await new AxeBuilder({ page })
+    .withTags([
+      "wcag2a",
+      "wcag2aa",
+      "wcag21a",
+      "wcag21aa",
+      "wcag22a",
+      "wcag22aa",
+    ])
+    .analyze()
+
+  expect(results.violations).toEqual([])
+})
