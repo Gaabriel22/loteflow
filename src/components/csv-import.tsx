@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { CsvColumnMapping } from "@/components/csv-column-mapping"
 import {
   Table,
   TableBody,
@@ -223,8 +224,8 @@ export function CsvImport() {
           Consulte seu arquivo CSV antes de preparar a planilha.
         </h2>
         <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">
-          O conteúdo é lido no navegador. Esta prévia não mapeia colunas nem
-          valida regras de produtos ou de ERP.
+          O conteúdo é lido no navegador. Você pode relacionar colunas aos
+          campos genéricos de produto; esta etapa não valida regras de ERP.
         </p>
 
         <Card className="mt-8 border-primary/15 shadow-sm">
@@ -282,6 +283,7 @@ export function CsvImport() {
               aria-atomic="true"
               aria-live="polite"
               className="text-sm text-muted-foreground"
+              id="csv-import-status"
               role="status"
             >
               {statusMessage}
@@ -314,6 +316,7 @@ export function CsvImport() {
             {preview && preview.rows.length > 0 && (
               <CsvPreviewTable preview={preview} />
             )}
+            {preview && <CsvColumnMapping preview={preview} />}
           </CardContent>
         </Card>
       </div>

@@ -12,7 +12,7 @@ test("lê CSV local e mostra valores como texto", async ({ page }) => {
 
   await fileInput.setInputFiles("tests/fixtures/produtos.csv")
 
-  await expect(page.locator('#importar-csv [role="status"]')).toContainText(
+  await expect(page.locator("#csv-import-status")).toContainText(
     "Leitura concluída. 3 registros e 3 colunas.",
   )
   await expect(page.getByRole("table")).toBeVisible()
@@ -98,10 +98,10 @@ test("limita a prévia a 100 registros e informa o total", async ({ page }) => {
     buffer: Buffer.from(csv),
   })
 
-  await expect(page.locator('#importar-csv [role="status"]')).toContainText(
+  await expect(page.locator("#csv-import-status")).toContainText(
     "105 registros e 2 colunas",
   )
-  await expect(page.locator('#importar-csv [role="status"]')).toContainText(
+  await expect(page.locator("#csv-import-status")).toContainText(
     "A prévia mostra os primeiros 100 registros.",
   )
   await expect(page.locator("tbody tr")).toHaveCount(100)
@@ -118,7 +118,7 @@ test("avisa sobre registros malformados e rejeita CSV com mais de 100 colunas", 
     mimeType: "text/csv",
     buffer: Buffer.from("SKU,Produto\nA,Produto extra\nB,Produto,Campo extra"),
   })
-  await expect(page.locator('#importar-csv [role="status"]')).toContainText(
+  await expect(page.locator("#csv-import-status")).toContainText(
     "1 registro precisa de revisão",
   )
   await expect(page.getByText("Revise os registros sinalizados")).toBeVisible()

@@ -45,8 +45,8 @@ export default function Home() {
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
               Experimente validações genéricas com dados fictícios ou consulte
-              uma prévia local de arquivos CSV. O mapeamento e a análise de
-              arquivos ainda estão em construção.
+              uma prévia local de arquivos CSV e relacione colunas aos campos
+              genéricos de produto. A análise de arquivos segue em construção.
             </p>
             <div className="mt-8">
               <Button
@@ -131,9 +131,9 @@ export default function Home() {
             </h2>
             <p className="max-w-2xl leading-7 text-muted-foreground">
               A demonstração usa dados fictícios. Arquivos CSV selecionados são
-              lidos no navegador para gerar uma prévia, sem envio ou
-              armazenamento. O mapeamento e a análise de produtos ainda não
-              estão disponíveis.
+              lidos no navegador para gerar uma prévia e relacionar campos, sem
+              envio ou armazenamento. O mapeamento existe apenas enquanto o
+              arquivo permanece selecionado. A análise segue em construção.
             </p>
           </div>
         </section>
@@ -142,7 +142,7 @@ export default function Home() {
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p>LoteFlow · projeto em construção</p>
-          <p>Prévia CSV local. Mapeamento e análise ainda em construção.</p>
+          <p>Prévia CSV local e mapeamento manual. Análise em construção.</p>
         </div>
       </footer>
     </>

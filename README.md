@@ -1,6 +1,6 @@
 # LoteFlow
 
-Ferramenta em construção para ajudar lojistas a preparar planilhas de produtos antes da importação. A página oferece uma demonstração fictícia e uma prévia local de CSV; mapeamento e análise de produtos ainda não estão disponíveis.
+Ferramenta em construção para ajudar lojistas a preparar planilhas de produtos antes da importação. A página oferece uma demonstração fictícia e leitura local de CSV com mapeamento manual de colunas para campos genéricos de produto.
 
 ## Requisitos
 
@@ -37,11 +37,12 @@ npx playwright install chromium
 - `src/app/`: página, layout, metadados, robots e sitemap.
 - `src/components/ui/`: componentes shadcn/ui usados pela interface.
 - `src/lib/parsers/`: leitura local de CSV.
+- `src/domain/product-mapping/`: regras puras para mapear colunas CSV a campos genéricos.
 - `src/lib/`: utilitários compartilhados.
 - `tests/unit/`: testes de funções puras.
 - `tests/e2e/`: smoke test responsivo e varredura axe.
 
-As pastas de domínio, exportação e workers entram quando uma change implementar esses fluxos.
+Exportação e workers entram quando uma change implementar esses fluxos.
 
 Os componentes locais foram gerados com shadcn CLI `4.23.0`; o código está versionado em `src/components/ui/`. O CLI não fica como dependência instalada, pois não é necessário para executar a aplicação.
 
@@ -59,4 +60,4 @@ Metadados, Open Graph, robots e sitemap descrevem apenas a página pública atua
 
 ## Limites desta fundação
 
-Não há mapeamento de colunas, validação de arquivos reais, leitura XLSX, regras de ERP, perfil Bling, correções, exportação ou promessa de compatibilidade. A auditoria axe não comprova conformidade WCAG 2.2 AA; ela complementa testes por teclado e revisão manual.
+O mapeamento é manual e temporário no navegador. Não há detecção automática, validação de arquivos reais, leitura XLSX, regras de ERP, perfil Bling, correções, exportação ou promessa de compatibilidade. A auditoria axe não comprova conformidade WCAG 2.2 AA; ela complementa testes por teclado e revisão manual.
