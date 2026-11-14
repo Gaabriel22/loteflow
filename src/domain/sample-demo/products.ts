@@ -1,10 +1,7 @@
-export type SampleProduct = {
+import type { ProductValues } from "../product-fields"
+
+export type SampleProduct = ProductValues & {
   id: string
-  sku: string
-  gtin: string
-  description: string
-  price: string
-  stock: string
 }
 
 const productRows = [

@@ -17,7 +17,7 @@ test("mapeia colunas repetidas e preserva os valores originais", async ({
   const mapping = page.getByRole("region", {
     name: "Relacione colunas a campos de produto",
   })
-  await expect(mapping.getByRole("status")).toHaveText(
+  await expect(page.locator("#csv-column-mapping-status")).toHaveText(
     "0 de 5 campos mapeados.",
   )
   await expect(mapping.getByRole("table")).toHaveCount(0)
@@ -33,8 +33,8 @@ test("mapeia colunas repetidas e preserva os valores originais", async ({
   await mapping.getByRole("combobox", { name: "SKU" }).click()
   await page.getByRole("option", { name: "Coluna 1: SKU" }).click()
 
-  const mappedTable = mapping.getByRole("table")
-  await expect(mapping.getByRole("status")).toHaveText(
+  const mappedTable = mapping.getByRole("table", { name: "Prévia organizada" })
+  await expect(page.locator("#csv-column-mapping-status")).toHaveText(
     "3 de 5 campos mapeados.",
   )
   await expect(mapping.getByRole("combobox", { name: "SKU" })).toContainText(
@@ -43,7 +43,7 @@ test("mapeia colunas repetidas e preserva os valores originais", async ({
   await expect(mappedTable).toContainText("000123")
   await expect(mappedTable).toContainText("Produto correto")
   await expect(mappedTable).toContainText("=1+1")
-  await expect(page.getByRole("table")).toHaveCount(2)
+  await expect(page.getByRole("table")).toHaveCount(3)
   const selectionRequests = requests.slice(requestCountBeforeSelection)
   expect(selectionRequests.some((request) => request.method === "POST")).toBe(
     false,
@@ -63,14 +63,16 @@ test("limpa o mapeamento ao trocar ou limpar arquivo", async ({ page }) => {
   })
   await mapping.getByRole("combobox", { name: "SKU" }).click()
   await page.getByRole("option", { name: "Coluna 1: SKU" }).click()
-  await expect(mapping.getByRole("status")).toContainText("1 de 5")
+  await expect(page.locator("#csv-column-mapping-status")).toContainText(
+    "1 de 5",
+  )
 
   await fileInput.setInputFiles({
     name: "novo.csv",
     mimeType: "text/csv",
     buffer: Buffer.from("Código,Nome\n001,Novo produto"),
   })
-  await expect(mapping.getByRole("status")).toHaveText(
+  await expect(page.locator("#csv-column-mapping-status")).toHaveText(
     "0 de 5 campos mapeados.",
   )
   await expect(mapping.getByRole("table")).toHaveCount(0)
@@ -79,6 +81,37 @@ test("limpa o mapeamento ao trocar ou limpar arquivo", async ({ page }) => {
   await page.getByRole("option", { name: "Coluna 1: Código" }).click()
   await page.getByRole("button", { name: "Limpar arquivo" }).click()
   await expect(mapping).toHaveCount(0)
+})
+
+test("abre opções abaixo do seletor sem alinhar itens sobre outros campos", async ({
+  page,
+}) => {
+  await page.goto("/#importar-csv")
+  await page
+    .getByLabel("Arquivo CSV", { exact: true })
+    .setInputFiles("tests/fixtures/mapeamento-colunas.csv")
+
+  const mapping = page.getByRole("region", {
+    name: "Relacione colunas a campos de produto",
+  })
+  const trigger = mapping.getByRole("combobox", { name: "SKU" })
+  await trigger.click()
+
+  const listbox = page.getByRole("listbox")
+  await expect(listbox.getByRole("option")).toHaveCount(5)
+
+  const triggerBounds = await trigger.boundingBox()
+  const listboxBounds = await listbox.boundingBox()
+  const popupBackground = await page
+    .locator('[data-slot="select-content"]')
+    .evaluate((popup) => getComputedStyle(popup).backgroundColor)
+
+  expect(triggerBounds).not.toBeNull()
+  expect(listboxBounds).not.toBeNull()
+  expect(popupBackground).not.toBe("rgba(0, 0, 0, 0)")
+  expect(listboxBounds!.y).toBeGreaterThanOrEqual(
+    triggerBounds!.y + triggerBounds!.height,
+  )
 })
 
 test("permite navegar pelos seletores com teclado e rolar tabela no mobile", async ({
@@ -98,7 +131,9 @@ test("permite navegar pelos seletores com teclado e rolar tabela no mobile", asy
   await page.keyboard.press("Enter")
   await page.keyboard.type("Coluna 1: SKU")
   await page.keyboard.press("Enter")
-  await expect(mapping.getByRole("status")).toContainText("1 de 5")
+  await expect(page.locator("#csv-column-mapping-status")).toContainText(
+    "1 de 5",
+  )
 
   const dimensions = await page.evaluate(() => {
     const documentWidth = document.documentElement.scrollWidth

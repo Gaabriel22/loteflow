@@ -1,14 +1,15 @@
-export const PRODUCT_CSV_FIELDS = [
-  { key: "sku", label: "SKU" },
-  { key: "gtin", label: "GTIN" },
-  { key: "description", label: "Descrição" },
-  { key: "price", label: "Preço" },
-  { key: "stock", label: "Estoque" },
-] as const
+import {
+  createEmptyProductValues,
+  PRODUCT_FIELDS,
+  type ProductField,
+  type ProductValues,
+} from "../product-fields"
 
-export type ProductCsvField = (typeof PRODUCT_CSV_FIELDS)[number]["key"]
+export { PRODUCT_FIELDS as PRODUCT_CSV_FIELDS } from "../product-fields"
 
-export type CsvColumnMapping = Record<ProductCsvField, number | null>
+export type ProductCsvField = ProductField
+
+export type CsvColumnMapping = Record<ProductField, number | null>
 
 export type CsvPreviewRows = {
   headers: readonly string[]
@@ -18,11 +19,12 @@ export type CsvPreviewRows = {
 
 export type MappedCsvPreview = {
   fields: Array<{
-    key: ProductCsvField
+    key: ProductField
     label: string
     columnIndex: number
   }>
   rows: string[][]
+  products: ProductValues[]
 }
 
 export function createEmptyCsvColumnMapping(): CsvColumnMapping {
@@ -39,7 +41,7 @@ export function deriveMappedCsvPreview(
   preview: CsvPreviewRows,
   mapping: CsvColumnMapping,
 ): MappedCsvPreview {
-  const fields = PRODUCT_CSV_FIELDS.flatMap(({ key, label }) => {
+  const fields = PRODUCT_FIELDS.flatMap(({ key, label }) => {
     const columnIndex = mapping[key]
 
     if (
@@ -54,9 +56,16 @@ export function deriveMappedCsvPreview(
     return [{ key, label, columnIndex }]
   })
 
-  const rows = preview.rows.map((row) =>
-    fields.map(({ columnIndex }) => row[columnIndex] ?? ""),
-  )
+  const products = preview.rows.map((row) => {
+    const product = createEmptyProductValues()
 
-  return { fields, rows }
+    for (const { key, columnIndex } of fields) {
+      product[key] = row[columnIndex] ?? ""
+    }
+
+    return product
+  })
+  const rows = products.map((product) => fields.map(({ key }) => product[key]))
+
+  return { fields, rows, products }
 }

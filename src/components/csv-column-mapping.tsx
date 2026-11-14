@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { CsvValidationResults } from "@/components/csv-validation-results"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import {
   Select,
@@ -73,7 +74,7 @@ function MappedCsvPreviewTable({
           Prévia organizada
         </h4>
         <p className="mt-1 text-sm text-muted-foreground">
-          Valores originais, sem validação ou alteração.
+          Valores originais, sem alteração.
         </p>
       </div>
       <Table
@@ -146,8 +147,8 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
           Relacione colunas a campos de produto
         </h3>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          Escolha uma coluna para cada campo. Os valores ficam como texto e não
-          são validados.
+          Escolha uma coluna para cada campo. A validação genérica se aplica aos
+          campos escolhidos sem alterar os valores.
         </p>
       </div>
 
@@ -186,7 +187,7 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
                     }
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent alignItemWithTrigger={false}>
                   <SelectGroup>
                     <SelectItem value={UNMAPPED_COLUMN_VALUE}>
                       Não mapeado
@@ -216,7 +217,13 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
       </p>
 
       {mappedPreview.fields.length > 0 ? (
-        <MappedCsvPreviewTable preview={mappedPreview} />
+        <>
+          <MappedCsvPreviewTable preview={mappedPreview} />
+          <CsvValidationResults
+            mappedPreview={mappedPreview}
+            totalRecordCount={preview.totalRecordCount}
+          />
+        </>
       ) : (
         <p className="mt-5 text-sm text-muted-foreground">
           Escolha ao menos uma coluna para ver a prévia organizada.
