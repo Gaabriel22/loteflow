@@ -46,6 +46,8 @@ npx playwright install chromium
 
 ## Relatório CSV da prévia
 
+Na lista de apontamentos, filtre por campo ou busque trechos de registro, valores e mensagens. A busca ignora caixa e acentos. Os filtros combinam e afetam somente a lista; o resumo da análise e o relatório continuam completos para a prévia. Edição e restauração mantêm filtros; mudar mapeamento ou arquivo reinicia os critérios. Use **Limpar filtros** para consultar todos os apontamentos novamente.
+
 Após mapear campos, baixe os apontamentos atuais em CSV pelo botão na validação. O relatório cobre até os primeiros 100 registros, inclui os valores mapeados e informa o total do arquivo. Edições e restaurações atualizam o relatório. Sem apontamentos, o botão fica desabilitado.
 
 O download usa UTF-8 com BOM e ponto e vírgula. Células potencialmente interpretáveis como fórmulas recebem apóstrofo apenas no relatório; a política aparece antes do botão. Programas de planilha podem inferir tipos ao abrir CSV, inclusive remover zeros à esquerda. O relatório não substitui o arquivo de produtos corrigido. Nenhum conteúdo é enviado ou persistido pela aplicação.

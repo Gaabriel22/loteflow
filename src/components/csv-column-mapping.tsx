@@ -361,6 +361,9 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
             preview={mappedPreview}
           />
           <CsvValidationResults
+            key={mappedPreview.fields
+              .map(({ key, columnIndex }) => `${key}:${columnIndex}`)
+              .join(",")}
             mappedPreview={mappedPreview}
             totalRecordCount={preview.totalRecordCount}
           />

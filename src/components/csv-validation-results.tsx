@@ -1,6 +1,14 @@
+"use client"
+
+import { useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { CsvReportExport } from "@/components/csv-report-export"
+import { CsvFindingsFilters } from "@/components/csv-findings-filters"
+import {
+  filterFindings,
+  type FindingsFilter,
+} from "@/domain/product-validation/filter-findings"
 import {
   Table,
   TableBody,
@@ -128,8 +136,10 @@ export function CsvValidationResults({
   mappedPreview: MappedCsvPreview
   totalRecordCount: number
 }) {
+  const [filter, setFilter] = useState<FindingsFilter>({ field: "", query: "" })
   const mappedFields = mappedPreview.fields.map(({ key }) => key)
   const validation = validateProducts(mappedPreview.products, mappedFields)
+  const visibleValidation = filterFindings(validation, filter)
 
   return (
     <section
@@ -173,14 +183,33 @@ export function CsvValidationResults({
         validation={validation}
       />
 
-      {validation.records.length > 0 ? (
+      <CsvFindingsFilters
+        fields={mappedPreview.fields}
+        filter={filter}
+        onChange={setFilter}
+      />
+      <p
+        className="text-sm text-muted-foreground"
+        id="csv-findings-filter-summary"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        Registros visíveis: {formatCount(visibleValidation.affectedRecordCount)}{" "}
+        de {formatCount(validation.affectedRecordCount)}. Apontamentos visíveis:{" "}
+        {formatCount(visibleValidation.findingCount)} de{" "}
+        {formatCount(validation.findingCount)}.
+      </p>
+
+      {visibleValidation.records.length > 0 ? (
         <ValidationFindingsTable
           fields={mappedPreview.fields}
-          validation={validation}
+          validation={visibleValidation}
         />
       ) : (
         <p className="text-sm text-muted-foreground">
-          Nenhum apontamento nos registros analisados.
+          {validation.findingCount === 0
+            ? "Nenhum apontamento nos registros analisados."
+            : "Nenhum apontamento corresponde aos filtros. Limpe os filtros para consultar a lista completa."}
         </p>
       )}
     </section>
