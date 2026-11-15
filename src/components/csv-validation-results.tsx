@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import { CsvReportExport } from "@/components/csv-report-export"
 import {
   Table,
   TableBody,
@@ -165,6 +166,12 @@ export function CsvValidationResults({
         para revisar: {formatCount(validation.affectedRecordCount)}.
         Apontamentos: {formatCount(validation.findingCount)}.
       </p>
+
+      <CsvReportExport
+        fields={mappedPreview.fields}
+        totalRecordCount={totalRecordCount}
+        validation={validation}
+      />
 
       {validation.records.length > 0 ? (
         <ValidationFindingsTable

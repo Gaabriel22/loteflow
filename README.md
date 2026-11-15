@@ -42,7 +42,13 @@ npx playwright install chromium
 - `tests/unit/`: testes de funções puras.
 - `tests/e2e/`: smoke test responsivo e varredura axe.
 
-Exportação e workers entram quando uma change implementar esses fluxos.
+`src/lib/export/` gera relatórios e inicia downloads locais. Papa Parse lê CSV em Web Worker.
+
+## Relatório CSV da prévia
+
+Após mapear campos, baixe os apontamentos atuais em CSV pelo botão na validação. O relatório cobre até os primeiros 100 registros, inclui os valores mapeados e informa o total do arquivo. Edições e restaurações atualizam o relatório. Sem apontamentos, o botão fica desabilitado.
+
+O download usa UTF-8 com BOM e ponto e vírgula. Células potencialmente interpretáveis como fórmulas recebem apóstrofo apenas no relatório; a política aparece antes do botão. Programas de planilha podem inferir tipos ao abrir CSV, inclusive remover zeros à esquerda. O relatório não substitui o arquivo de produtos corrigido. Nenhum conteúdo é enviado ou persistido pela aplicação.
 
 Os componentes locais foram gerados com shadcn CLI `4.23.0`; o código está versionado em `src/components/ui/`. O CLI não fica como dependência instalada, pois não é necessário para executar a aplicação.
 
@@ -60,4 +66,4 @@ Metadados, Open Graph, robots e sitemap descrevem apenas a página pública atua
 
 ## Limites desta fundação
 
-O mapeamento é manual e temporário no navegador. Não há detecção automática, validação de arquivos reais, leitura XLSX, regras de ERP, perfil Bling, correções, exportação ou promessa de compatibilidade. A auditoria axe não comprova conformidade WCAG 2.2 AA; ela complementa testes por teclado e revisão manual.
+O mapeamento e a edição manual são temporários no navegador. A validação genérica e o relatório cobrem somente a prévia. Não há detecção automática, leitura XLSX, regras de ERP, perfil Bling, exportação completa de produtos ou promessa de compatibilidade. A auditoria axe não comprova conformidade WCAG 2.2 AA; ela complementa testes por teclado e revisão manual.
