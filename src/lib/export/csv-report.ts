@@ -3,7 +3,7 @@ import type { MappedCsvPreview } from "@/domain/product-mapping/csv-column-mappi
 import type { ProductValidation } from "@/domain/product-validation"
 import type { ProductValues } from "@/domain/product-fields"
 
-type CsvReportInput = {
+export type CsvReportInput = {
   validation: ProductValidation<ProductValues>
   fields: MappedCsvPreview["fields"]
   totalRecordCount: number
@@ -15,7 +15,7 @@ export function createCsvReport({
   totalRecordCount,
 }: CsvReportInput): string {
   const headers = [
-    "Registro da prévia",
+    "Registro do arquivo",
     "Campo",
     "Apontamento",
     "Registros analisados",

@@ -15,6 +15,14 @@ const originalRows = [
 ]
 
 describe("csv-cell-edits", () => {
+  it("shares unchanged rows and copies only edited rows", () => {
+    expect(applyCsvCellEdits(originalRows, {}, 3)).toBe(originalRows)
+    const edits = updateCsvCellEdit({}, originalRows, 3, 1, 0, "UPDATED")
+    const rows = applyCsvCellEdits(originalRows, edits, 3)
+    expect(rows[0]).toBe(originalRows[0])
+    expect(rows[1]).not.toBe(originalRows[1])
+    expect(originalRows[1]?.[0]).toBe("SKU-02")
+  })
   it("projects reused columns from one edited source cell", () => {
     const edits = updateCsvCellEdit({}, originalRows, 3, 0, 0, "000099")
     const mapped = deriveMappedCsvPreview(

@@ -22,7 +22,7 @@ test("edita células mapeadas, recalcula validação e restaura valores locais",
   await page.getByRole("option", { name: "Coluna 1: SKU" }).click()
 
   const results = page.getByRole("region", {
-    name: "Validação genérica da prévia",
+    name: "Validação genérica do arquivo",
   })
   await expect(results.getByRole("status")).toContainText("Apontamentos: 3.")
   await page.getByRole("button", { name: "Editar valores" }).click()

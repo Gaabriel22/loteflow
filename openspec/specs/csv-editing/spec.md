@@ -4,7 +4,7 @@
 Permitir edição manual, local e reversível dos valores mapeados da prévia CSV, preservando os dados originais e atualizando os apontamentos genéricos.
 ## Requirements
 ### Requirement: Editar manualmente valores mapeados da prévia
-A aplicação MUST iniciar em modo de leitura e MUST exigir ação explícita antes de permitir edição. Em modo de edição, MUST permitir alterar como texto somente células de colunas atualmente mapeadas e presentes na prévia, limitada aos primeiros 100 registros. MUST manter campos acessíveis com rótulos que identifiquem registro e campo. Uma alteração MUST atualizar a cópia de trabalho sem converter ou executar o conteúdo.
+A aplicação MUST iniciar em modo de leitura e MUST exigir ação explícita antes de permitir edição. Em modo de edição, MUST permitir alterar como texto somente células de colunas atualmente mapeadas em qualquer página do documento aceito, limitado a 100 registros renderizados por página. MUST manter campos acessíveis com rótulos que identifiquem registro e campo. Uma alteração MUST atualizar a cópia de trabalho sem converter ou executar o conteúdo.
 
 #### Scenario: Consultar prévia sem editar
 - **WHEN** uma pessoa mapeia ao menos um campo
@@ -39,7 +39,7 @@ A aplicação MUST manter a prévia CSV original intacta e aplicar alterações 
 
 #### Scenario: Limitar edição à prévia
 - **WHEN** o arquivo possui mais registros que o limite de prévia
-- **THEN** nenhuma edição pode alterar registros que não estejam presentes na prévia
+- **THEN** a pessoa pode navegar e editar registros de qualquer página do documento, preservando o índice global e as alterações ao retornar
 
 ### Requirement: Restaurar alterações sem perder o original
 A aplicação MUST permitir restaurar o valor original de uma célula alterada e restaurar todas as alterações da cópia de trabalho. MUST indicar a quantidade de células editadas na sessão do arquivo. Trocar ou limpar o arquivo MUST descartar alterações e mapeamentos da seleção anterior.

@@ -5,7 +5,7 @@ export function downloadCsv(csv: string): void {
 
   try {
     link.href = url
-    link.download = "loteflow-apontamentos-previa.csv"
+    link.download = "loteflow-apontamentos.csv"
     document.body.append(link)
     link.click()
   } finally {

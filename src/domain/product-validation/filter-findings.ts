@@ -18,14 +18,15 @@ export function filterFindings(
   { field, query }: FindingsFilter,
 ): ProductValidation<ProductValues> {
   const search = normalizeSearch(query.trim())
+  if (field === "" && search === "") return validation
   const records = validation.records.flatMap((record) => {
     const recordValues = [
       String(record.recordIndex + 1),
       ...Object.values(record.product),
     ]
-    const matchesRecord = recordValues.some((value) =>
-      normalizeSearch(value).includes(search),
-    )
+    const matchesRecord =
+      search === "" ||
+      recordValues.some((value) => normalizeSearch(value).includes(search))
     const findings = record.findings.filter((finding) => {
       const matchesField = field === "" || finding.field === field
       const matchesQuery =

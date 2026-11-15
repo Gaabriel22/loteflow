@@ -1,6 +1,5 @@
 export const MAX_CSV_FILE_BYTES = 10 * 1024 * 1024
 export const MAX_CSV_COLUMN_COUNT = 100
-export const MAX_CSV_PREVIEW_ROWS = 100
 export const MAX_CSV_RECORDS = 20_000
 
 export type CsvImportLimits = {

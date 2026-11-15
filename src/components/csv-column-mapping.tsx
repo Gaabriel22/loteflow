@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import { CsvPagination } from "@/components/csv-pagination"
+import { getPageWindow } from "@/domain/pagination"
 import { CsvValidationResults } from "@/components/csv-validation-results"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -81,6 +83,8 @@ function MappedCsvPreviewTable({
   onEdit: (rowIndex: number, columnIndex: number, value: string) => void
   onRestore: (rowIndex: number, columnIndex: number) => void
 }) {
+  const [page, setPage] = useState(0)
+  const { offset, end } = getPageWindow(preview.rows.length, page)
   return (
     <div className="mt-6 min-w-0">
       <div className="mb-3">
@@ -117,83 +121,94 @@ function MappedCsvPreviewTable({
           </TableRow>
         </TableHeader>
         <TableBody className="divide-y divide-border">
-          {preview.rows.map((row, rowIndex) => (
-            <TableRow className="align-top" key={rowIndex}>
-              <TableHead
-                className="px-4 py-3 font-medium tabular-nums text-foreground"
-                scope="row"
-              >
-                {rowIndex + 1}
-              </TableHead>
-              {row.map((value, columnIndex) => {
-                const field = preview.fields[columnIndex]
-                const sourceColumn = field?.columnIndex
-                const isCellEdited =
-                  sourceColumn !== undefined &&
-                  edits[rowIndex]?.[sourceColumn] !== undefined
-                const inputId = `csv-cell-${rowIndex}-${field?.key}`
+          {preview.rows.slice(offset, end).map((row, pageIndex) => {
+            const rowIndex = offset + pageIndex
+            return (
+              <TableRow className="align-top" key={rowIndex}>
+                <TableHead
+                  className="px-4 py-3 font-medium tabular-nums text-foreground"
+                  scope="row"
+                >
+                  {rowIndex + 1}
+                </TableHead>
+                {row.map((value, columnIndex) => {
+                  const field = preview.fields[columnIndex]
+                  const sourceColumn = field?.columnIndex
+                  const isCellEdited =
+                    sourceColumn !== undefined &&
+                    edits[rowIndex]?.[sourceColumn] !== undefined
+                  const inputId = `csv-cell-${rowIndex}-${field?.key}`
 
-                return (
-                  <TableCell
-                    className="max-w-72 px-4 py-3 whitespace-pre-wrap text-foreground"
-                    key={`${field?.key}-${rowIndex}`}
-                  >
-                    {isEditing && field && sourceColumn !== undefined ? (
-                      <div className="grid min-w-40 gap-2">
-                        <Input
-                          aria-label={`Registro ${rowIndex + 1}, ${field.label}`}
-                          aria-describedby="csv-edit-help"
-                          className="min-w-40"
-                          id={inputId}
-                          onChange={(event) =>
-                            onEdit(
-                              rowIndex,
-                              sourceColumn,
-                              event.currentTarget.value,
-                            )
-                          }
-                          type="text"
-                          value={value}
-                        />
-                        {isCellEdited && (
-                          <Button
-                            aria-label={`Restaurar valor original do registro ${rowIndex + 1}, campo ${field.label}`}
-                            className="justify-self-start"
-                            onClick={() => onRestore(rowIndex, sourceColumn)}
-                            size="xs"
-                            type="button"
-                            variant="outline"
-                          >
-                            Restaurar
-                          </Button>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="grid justify-items-start gap-2">
-                        {value}
-                        {isCellEdited && (
-                          <>
-                            <Badge variant="secondary">Editado</Badge>
+                  return (
+                    <TableCell
+                      className="max-w-72 px-4 py-3 whitespace-pre-wrap text-foreground"
+                      key={`${field?.key}-${rowIndex}`}
+                    >
+                      {isEditing && field && sourceColumn !== undefined ? (
+                        <div className="grid min-w-40 gap-2">
+                          <Input
+                            aria-label={`Registro ${rowIndex + 1}, ${field.label}`}
+                            aria-describedby="csv-edit-help"
+                            className="min-w-40"
+                            id={inputId}
+                            onChange={(event) =>
+                              onEdit(
+                                rowIndex,
+                                sourceColumn,
+                                event.currentTarget.value,
+                              )
+                            }
+                            type="text"
+                            value={value}
+                          />
+                          {isCellEdited && (
                             <Button
-                              aria-label={`Restaurar valor original do registro ${rowIndex + 1}, campo ${field?.label}`}
-                              onClick={() => onRestore(rowIndex, sourceColumn!)}
+                              aria-label={`Restaurar valor original do registro ${rowIndex + 1}, campo ${field.label}`}
+                              className="justify-self-start"
+                              onClick={() => onRestore(rowIndex, sourceColumn)}
                               size="xs"
                               type="button"
                               variant="outline"
                             >
                               Restaurar
                             </Button>
-                          </>
-                        )}
-                      </span>
-                    )}
-                  </TableCell>
-                )
-              })}
-            </TableRow>
-          ))}
+                          )}
+                        </div>
+                      ) : (
+                        <span className="grid justify-items-start gap-2">
+                          {value}
+                          {isCellEdited && (
+                            <>
+                              <Badge variant="secondary">Editado</Badge>
+                              <Button
+                                aria-label={`Restaurar valor original do registro ${rowIndex + 1}, campo ${field?.label}`}
+                                onClick={() =>
+                                  onRestore(rowIndex, sourceColumn!)
+                                }
+                                size="xs"
+                                type="button"
+                                variant="outline"
+                              >
+                                Restaurar
+                              </Button>
+                            </>
+                          )}
+                        </span>
+                      )}
+                    </TableCell>
+                  )
+                })}
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
+      <CsvPagination
+        label="Paginação dos campos mapeados"
+        totalCount={preview.rows.length}
+        page={page}
+        onPageChange={setPage}
+      />
     </div>
   )
 }
@@ -203,11 +218,17 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
   const [edits, setEdits] = useState<CsvCellEdits>({})
   const [isEditing, setIsEditing] = useState(false)
   const editCount = countCsvCellEdits(edits)
-  const workingPreview = {
-    ...preview,
-    rows: applyCsvCellEdits(preview.rows, edits, preview.columnCount),
-  }
-  const mappedPreview = deriveMappedCsvPreview(workingPreview, mapping)
+  const mappedPreview = useMemo(
+    () =>
+      deriveMappedCsvPreview(
+        {
+          ...preview,
+          rows: applyCsvCellEdits(preview.rows, edits, preview.columnCount),
+        },
+        mapping,
+      ),
+    [preview, mapping, edits],
+  )
 
   function handleMappingChange(
     field: keyof CsvColumnMappingState,

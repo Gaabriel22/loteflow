@@ -4,7 +4,7 @@
 Permitir localizar apontamentos da prévia CSV por campo e busca textual, preservando os dados, a análise integral e o escopo do relatório.
 ## Requirements
 ### Requirement: Filtrar apontamentos sem alterar análise
-A aplicação MUST oferecer filtro por campo mapeado, Linha ou Todos os campos, e busca textual literal em registro base 1, valores mapeados, campo e mensagem. A busca MUST ignorar caixa, acentos e espaços externos da consulta. Critérios MUST combinar por AND no mesmo apontamento. A lista MUST manter índices originais e mostrar somente apontamentos correspondentes, sem alterar dados, totais da análise ou relatório integral da prévia.
+A aplicação MUST oferecer filtro por campo mapeado, Linha ou Todos os campos, e busca textual literal em registro base 1, valores mapeados, campo e mensagem. A busca MUST ignorar caixa, acentos e espaços externos da consulta. Critérios MUST combinar por AND no mesmo apontamento. A lista MUST manter índices originais e mostrar somente apontamentos correspondentes, sem alterar dados, totais da análise ou relatório integral do documento.
 
 #### Scenario: Combinar campo e busca
 - **WHEN** a pessoa escolhe Preço e busca um valor presente no registro
@@ -16,10 +16,10 @@ A aplicação MUST oferecer filtro por campo mapeado, Linha ou Todos os campos, 
 
 #### Scenario: Exportar com filtro ativo
 - **WHEN** a pessoa baixa relatório com filtros ativos
-- **THEN** o relatório inclui todos os apontamentos atuais da prévia conforme aviso visível, independentemente dos filtros
+- **THEN** o relatório inclui todos os apontamentos atuais do documento conforme aviso visível, independentemente dos filtros
 
 ### Requirement: Mostrar contagens e reiniciar filtros
-A interface MUST mostrar número de registros e apontamentos visíveis em relação aos totais da prévia e MUST permitir limpar filtros. MUST distinguir nenhum apontamento na análise de nenhuma correspondência nos filtros. Edição e restauração MUST manter critérios e recalcular resultados. Mudança de mapeamento, troca ou limpeza de arquivo MUST reiniciar critérios. As opções de campo MUST permanecer disponíveis enquanto o campo estiver mapeado, mesmo sem apontamentos.
+A interface MUST mostrar número de registros e apontamentos visíveis em relação aos totais do documento e MUST permitir limpar filtros. A filtragem MUST ocorrer antes da paginação; mudar critérios MUST reiniciar a primeira página de apontamentos. MUST distinguir nenhum apontamento na análise de nenhuma correspondência nos filtros. Edição e restauração MUST manter critérios e recalcular resultados. Mudança de mapeamento, troca ou limpeza de arquivo MUST reiniciar critérios. As opções de campo MUST permanecer disponíveis enquanto o campo estiver mapeado, mesmo sem apontamentos.
 
 #### Scenario: Nenhuma correspondência
 - **WHEN** os filtros não correspondem a nenhum apontamento existente

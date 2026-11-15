@@ -24,9 +24,12 @@ test("aceita 20.000 registros, mantém prévia de 100 e rejeita 20.001 sem resul
   )
   await expect(page.locator("tbody tr")).toHaveCount(100)
   await expect(
-    page.getByText("O documento completo está na memória desta página.", {
-      exact: false,
-    }),
+    page.getByText(
+      "Edição, análise e relatório cobrem todos os registros deste arquivo.",
+      {
+        exact: false,
+      },
+    ),
   ).toBeVisible()
   await file.setInputFiles({
     name: "excesso.csv",

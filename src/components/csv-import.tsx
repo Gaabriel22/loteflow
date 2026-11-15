@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { CsvColumnMapping } from "@/components/csv-column-mapping"
+import { CsvPagination } from "@/components/csv-pagination"
+import { CSV_PAGE_SIZE, getPageWindow } from "@/domain/pagination"
 import {
   Table,
   TableBody,
@@ -31,7 +33,6 @@ import {
 import type { CsvParseIssue } from "@/lib/parsers/csv-types"
 import {
   MAX_CSV_COLUMN_COUNT,
-  MAX_CSV_PREVIEW_ROWS,
   MAX_CSV_RECORDS,
   validateCsvFile,
 } from "@/lib/parsers/csv-file"
@@ -73,8 +74,8 @@ function getCompletionMessage(preview: CsvPreview): string {
       ? getMalformedRecordMessage(preview.malformedRecordCount)
       : ""
   const previewMessage =
-    preview.totalRecordCount > MAX_CSV_PREVIEW_ROWS
-      ? ` A prévia mostra os primeiros ${MAX_CSV_PREVIEW_ROWS} registros.`
+    preview.totalRecordCount > CSV_PAGE_SIZE
+      ? ` Consulte todos os registros em páginas de até ${CSV_PAGE_SIZE}.`
       : ""
 
   return `Leitura concluída. ${recordCount} ${getRecordLabel(preview.totalRecordCount)} e ${columnCount} colunas.${malformedMessage}${previewMessage}`
@@ -103,6 +104,8 @@ function getParseOutcomeMessage(kind: CsvParseIssue) {
 }
 
 function CsvPreviewTable({ preview }: { preview: CsvPreview }) {
+  const [page, setPage] = useState(0)
+  const { offset, end } = getPageWindow(preview.rows.length, page)
   return (
     <div className="min-w-0">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
@@ -110,7 +113,7 @@ function CsvPreviewTable({ preview }: { preview: CsvPreview }) {
           Prévia do arquivo
         </h3>
         <p className="text-xs text-muted-foreground">
-          Mostrando até {MAX_CSV_PREVIEW_ROWS} registros
+          Até {CSV_PAGE_SIZE} registros por página
         </p>
       </div>
       <Table
@@ -135,13 +138,13 @@ function CsvPreviewTable({ preview }: { preview: CsvPreview }) {
           </TableRow>
         </TableHeader>
         <TableBody className="divide-y divide-border">
-          {preview.rows.map((row, rowIndex) => (
-            <TableRow className="align-top" key={rowIndex}>
+          {preview.rows.slice(offset, end).map((row, rowIndex) => (
+            <TableRow className="align-top" key={offset + rowIndex}>
               <TableHead
                 className="px-4 py-3 font-medium tabular-nums text-foreground"
                 scope="row"
               >
-                {rowIndex + 1}
+                {offset + rowIndex + 1}
               </TableHead>
               {Array.from({ length: preview.columnCount }, (_, columnIndex) => (
                 <TableCell
@@ -155,6 +158,12 @@ function CsvPreviewTable({ preview }: { preview: CsvPreview }) {
           ))}
         </TableBody>
       </Table>
+      <CsvPagination
+        label="Paginação do arquivo"
+        totalCount={preview.rows.length}
+        page={page}
+        onPageChange={setPage}
+      />
       <p className="sr-only" id="csv-preview-help">
         A tabela pode ser rolada na horizontal para consultar todas as colunas.
       </p>
@@ -165,8 +174,6 @@ function CsvPreviewTable({ preview }: { preview: CsvPreview }) {
 export function CsvImport() {
   const [csvDocument, setCsvDocument] = useState<CsvDocument | null>(null)
   const preview = csvDocument
-    ? { ...csvDocument, rows: csvDocument.rows.slice(0, MAX_CSV_PREVIEW_ROWS) }
-    : null
   const activeRead = useRef<AbortController | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
   const [selectedFileName, setSelectedFileName] = useState("")
@@ -301,7 +308,7 @@ export function CsvImport() {
             </CardTitle>
             <CardDescription className="leading-6">
               Escolha um arquivo UTF-8 de até 10 MiB, 20.000 registros e 100
-              colunas. A tabela mostra até 100 registros.
+              colunas. As tabelas mostram até 100 registros por página.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid min-w-0 gap-5 pt-5">
@@ -368,9 +375,8 @@ export function CsvImport() {
             )}
             {preview && (
               <p className="text-sm text-muted-foreground">
-                O documento completo está na memória desta página. Edição,
-                análise e relatório ainda cobrem somente os primeiros{" "}
-                {MAX_CSV_PREVIEW_ROWS} registros.
+                Edição, análise e relatório cobrem todos os registros deste
+                arquivo. Navegue pelas páginas para consultar os dados.
               </p>
             )}
 

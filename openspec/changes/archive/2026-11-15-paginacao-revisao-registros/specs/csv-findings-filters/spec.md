@@ -1,0 +1,35 @@
+## MODIFIED Requirements
+
+### Requirement: Filtrar apontamentos sem alterar análise
+A aplicação MUST oferecer filtro por campo mapeado, Linha ou Todos os campos, e busca textual literal em registro base 1, valores mapeados, campo e mensagem. A busca MUST ignorar caixa, acentos e espaços externos da consulta. Critérios MUST combinar por AND no mesmo apontamento. A lista MUST manter índices originais e mostrar somente apontamentos correspondentes, sem alterar dados, totais da análise ou relatório integral do documento.
+
+#### Scenario: Combinar campo e busca
+- **WHEN** a pessoa escolhe Preço e busca um valor presente no registro
+- **THEN** somente os apontamentos de Preço dos registros correspondentes aparecem
+
+#### Scenario: Buscar mensagem sem acentos
+- **WHEN** a pessoa busca um trecho literal de mensagem sem acentos e com outra caixa
+- **THEN** os apontamentos equivalentes aparecem sem executar expressões ou código
+
+#### Scenario: Exportar com filtro ativo
+- **WHEN** a pessoa baixa relatório com filtros ativos
+- **THEN** o relatório inclui todos os apontamentos atuais do documento conforme aviso visível, independentemente dos filtros
+
+### Requirement: Mostrar contagens e reiniciar filtros
+A interface MUST mostrar número de registros e apontamentos visíveis em relação aos totais do documento e MUST permitir limpar filtros. A filtragem MUST ocorrer antes da paginação; mudar critérios MUST reiniciar a primeira página de apontamentos. MUST distinguir nenhum apontamento na análise de nenhuma correspondência nos filtros. Edição e restauração MUST manter critérios e recalcular resultados. Mudança de mapeamento, troca ou limpeza de arquivo MUST reiniciar critérios. As opções de campo MUST permanecer disponíveis enquanto o campo estiver mapeado, mesmo sem apontamentos.
+
+#### Scenario: Nenhuma correspondência
+- **WHEN** os filtros não correspondem a nenhum apontamento existente
+- **THEN** a interface explica que nenhum apontamento corresponde aos filtros e permite limpar critérios sem alterar resumo ou download
+
+#### Scenario: Limpar filtros
+- **WHEN** a pessoa escolhe Limpar filtros
+- **THEN** busca fica vazia, campo volta a Todos os campos e a lista integral reaparece
+
+#### Scenario: Editar valores filtrados
+- **WHEN** uma edição resolve um apontamento selecionado
+- **THEN** a lista e contagens atualizam mantendo critérios e opções de campo
+
+#### Scenario: Remapear ou trocar arquivo
+- **WHEN** muda o mapeamento ou o arquivo selecionado
+- **THEN** os filtros reiniciam sem reaproveitar critérios anteriores

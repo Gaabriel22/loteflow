@@ -3,12 +3,10 @@
 ## Purpose
 
 Validar campos mapeados da prÃ©via CSV com regras genÃ©ricas, mantendo dados locais e limitando a anÃ¡lise aos registros exibidos.
-
 ## Requirements
-
 ### Requirement: Validar somente os campos mapeados com regras genéricas
 
-A aplicação MUST validar cada campo somente quando estiver mapeado. SKU não vazio MUST ser comparado sem espaços externos e sem diferença entre maiúsculas e minúsculas. GTIN mapeado e preenchido MUST ser validado pelo dígito verificador nos comprimentos aceitos. Descrição mapeada MUST estar preenchida. Preço e estoque mapeados MUST seguir a validação numérica genérica atual. Se todos os campos mapeados de um registro estiverem vazios, MUST ser exibido apenas um apontamento de linha vazia. GTIN e SKU vazios MUST permanecer permitidos fora desse caso.
+A aplicação MUST validar todos os registros do documento aceito, em qualquer página, e cada campo somente quando estiver mapeado. SKU não vazio MUST ser comparado sem espaços externos e sem diferença entre maiúsculas e minúsculas. GTIN mapeado e preenchido MUST ser validado pelo dígito verificador nos comprimentos aceitos. Descrição mapeada MUST estar preenchida. Preço e estoque mapeados MUST seguir a validação numérica genérica atual. Se todos os campos mapeados de um registro estiverem vazios, MUST ser exibido apenas um apontamento de linha vazia. GTIN e SKU vazios MUST permanecer permitidos fora desse caso.
 
 #### Scenario: Ignorar regras de campo não mapeado
 
@@ -17,7 +15,7 @@ A aplicação MUST validar cada campo somente quando estiver mapeado. SKU não v
 
 #### Scenario: Encontrar SKU repetido na prévia
 
-- **WHEN** dois registros da prévia têm o mesmo SKU após remover espaços externos e ignorar diferença entre maiúsculas e minúsculas
+- **WHEN** dois registros do documento, inclusive em páginas diferentes, têm o mesmo SKU após remover espaços externos e ignorar diferença entre maiúsculas e minúsculas
 - **THEN** cada registro repetido recebe um apontamento de SKU
 
 #### Scenario: Validar GTIN preenchido sem exigir GTIN
@@ -42,12 +40,12 @@ A aplicação MUST validar cada campo somente quando estiver mapeado. SKU não v
 
 ### Requirement: Limitar validação aos registros da prévia local
 
-A aplicação MUST validar somente os registros presentes na prévia mapeada, até o limite existente de 100 registros. MUST informar quantos registros foram analisados e quantos registros do arquivo não foram analisados. MUST manter valores como texto, não alterar dados e não enviar nem persistir valores, mapeamentos ou resultados. A demonstração fictícia MUST manter os resultados existentes após a extração das regras compartilhadas.
+A aplicação MUST validar todos os registros presentes no documento mapeado aceito, até os limites de importação existentes, independentemente da página visível. MUST informar quantos registros foram analisados e que o escopo cobre todo o arquivo aceito. MUST manter valores como texto, não alterar dados e não enviar nem persistir valores, mapeamentos ou resultados. A demonstração fictícia MUST manter os resultados existentes após a extração das regras compartilhadas.
 
 #### Scenario: Arquivo excede o limite da prévia
 
 - **WHEN** o arquivo contém mais registros do que aparecem na prévia CSV
-- **THEN** a validação usa somente os registros da prévia e informa quantos registros ficaram fora da análise
+- **THEN** a validação usa todos os registros do documento e informa o total analisado, mesmo que apenas uma página esteja visível
 
 #### Scenario: Preservar valores originais
 

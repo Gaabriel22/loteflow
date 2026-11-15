@@ -78,8 +78,8 @@ export function CsvFindingsFilters({
         id="csv-findings-search-help"
       >
         Busque por registro, valores mapeados, campo ou mensagem. Os filtros
-        afetam somente a lista; o relatório inclui todos os apontamentos da
-        prévia.
+        afetam somente a lista; o relatório inclui todos os apontamentos do
+        arquivo.
       </p>
       <Button
         className="justify-self-start"

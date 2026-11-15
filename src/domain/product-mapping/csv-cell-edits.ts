@@ -60,12 +60,13 @@ export function applyCsvCellEdits(
   rows: readonly (readonly string[])[],
   edits: CsvCellEdits,
   columnCount: number,
-): string[][] {
+): readonly (readonly string[])[] {
+  if (Object.keys(edits).length === 0) return rows
   return rows.map((row, rowIndex) => {
     const rowEdits = edits[rowIndex]
 
     if (!rowEdits) {
-      return [...row]
+      return row
     }
 
     return Array.from(

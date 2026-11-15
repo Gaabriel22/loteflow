@@ -4,11 +4,11 @@ Registro das próximas etapas acordadas em 14/11/2026. Base: [especificação in
 
 ## Estado atual
 
-Landing page, demonstração fictícia, leitura local de CSV, mapeamento, validação genérica, edição manual reversível, relatório CSV e filtros de apontamentos estão implementados. Análise, edição e relatório ainda cobrem somente a prévia de até 100 registros. A configuração do Next.js já inclui cabeçalhos de segurança e CSP.
+Landing page, demonstração fictícia, leitura local de CSV, mapeamento, validação genérica, edição manual reversível, relatório CSV e filtros de apontamentos estão implementados. A revisão agora cobre todo o documento aceito, com até 100 registros renderizados por página nas tabelas. O relatório integral é gerado em Worker. A configuração do Next.js já inclui cabeçalhos de segurança e CSP.
 
 ## Changes previstas
 
-A estimativa inicial foi de 12 changes. As etapas 1, `leitura-csv-completa`, e 2, `processamento-integral-csv`, estão implementadas e arquivadas. Restam **10 próximas changes**, mais uma opcional para analytics. A divisão pode mudar conforme os requisitos forem detalhados no OpenSpec; os demais nomes abaixo são sugestões, não changes já criadas.
+A estimativa inicial foi de 12 changes. As etapas 1, `leitura-csv-completa`, 2, `processamento-integral-csv`, e 3, `paginacao-revisao-registros`, estão arquivadas. Restam **9 próximas changes**, mais uma opcional para analytics. A divisão pode mudar conforme os requisitos forem detalhados no OpenSpec; os demais nomes abaixo são sugestões, não changes já criadas.
 
 | Ordem | Change sugerida                  | Resultado esperado                                                                                                                    |
 | ----- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -43,4 +43,4 @@ Decisão explícita: reservar uma change dedicada a deixar o produto mais bonito
 
 ## Como continuar
 
-Próxima etapa: priorizar `paginacao-revisao-registros` para levar edição, análise, filtros e relatório ao documento completo. Manter cada entrega no fluxo OpenSpec: proposta, especificações, implementação, verificação, sincronização e arquivamento. Atualizar este roteiro conforme as etapas forem concluídas ou o escopo mudar.
+Após concluir e arquivar `paginacao-revisao-registros`, priorizar `importacao-xlsx-local`. Manter cada entrega no fluxo OpenSpec: proposta, especificações, implementação, verificação, sincronização e arquivamento. Atualizar este roteiro conforme as etapas forem concluídas ou o escopo mudar.

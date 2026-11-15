@@ -8,7 +8,7 @@ A aplicação MUST processar e reter em memória todos os registros de arquivos 
 
 #### Scenario: Processar limite de registros
 - **WHEN** um arquivo dentro dos limites contém 20.000 registros
-- **THEN** o documento em memória contém todos os 20.000 registros e a interface mantém prévia de 100 registros
+- **THEN** o documento em memória contém todos os 20.000 registros e a interface permite navegar por todo o documento em páginas de até 100 registros
 
 #### Scenario: Rejeitar excesso
 - **WHEN** o arquivo contém mais registros que o limite configurado

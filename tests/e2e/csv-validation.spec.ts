@@ -33,7 +33,7 @@ test("valida campos mapeados e preserva dados locais", async ({ page }) => {
   await selectColumn(page, "Estoque", "Coluna 5: Estoque")
 
   const results = page.getByRole("region", {
-    name: "Validação genérica da prévia",
+    name: "Validação genérica do arquivo",
   })
   await expect(results.getByRole("status")).toHaveText(
     "Registros analisados: 4. Registros para revisar: 3. Apontamentos: 7.",
@@ -59,7 +59,7 @@ test("valida campos mapeados e preserva dados locais", async ({ page }) => {
   ).toBe(false)
 })
 
-test("limita análise a 100 registros, opera por teclado e cabe em viewports estreitos", async ({
+test("analisa todo o arquivo, opera por teclado e cabe em viewports estreitos", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
@@ -79,13 +79,13 @@ test("limita análise a 100 registros, opera por teclado e cabe em viewports est
   await page.keyboard.press("Enter")
 
   const results = page.getByRole("region", {
-    name: "Validação genérica da prévia",
+    name: "Validação genérica do arquivo",
   })
   await expect(results.getByRole("status")).toHaveText(
-    "Registros analisados: 100. Registros para revisar: 0. Apontamentos: 0.",
+    "Registros analisados: 105. Registros para revisar: 2. Apontamentos: 2.",
   )
   await expect(results).toContainText(
-    "A análise cobre 100 registros da prévia. 5 registros do arquivo não foram analisados.",
+    "A análise cobre 105 registros do arquivo. Todos os registros do arquivo estão incluídos na análise.",
   )
 
   for (const width of [390, 640, 720, 1440]) {

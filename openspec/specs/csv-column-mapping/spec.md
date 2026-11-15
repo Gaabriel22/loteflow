@@ -2,9 +2,7 @@
 
 ## Purpose
 Definir o mapeamento manual de colunas CSV para campos genéricos de produto e a prévia local dos valores mapeados.
-
 ## Requirements
-
 ### Requirement: Mapear colunas CSV para campos genéricos
 A aplicação MUST permitir relacionar manualmente colunas da prévia CSV aos campos genéricos SKU, GTIN, descrição, preço e estoque. Cada campo MUST iniciar sem mapeamento e aceitar no máximo uma coluna de origem. Uma coluna de origem MAY ser escolhida para mais de um campo quando a pessoa fizer essa escolha explícita. A aplicação MUST NOT inferir mapeamentos por cabeçalho, posição ou conteúdo.
 
@@ -25,7 +23,7 @@ A aplicação MUST permitir relacionar manualmente colunas da prévia CSV aos ca
 - **THEN** a prévia mapeada reflete a escolha atual sem conservar o valor anterior
 
 ### Requirement: Pré-visualizar campos mapeados sem transformar valores
-A aplicação MUST mostrar uma prévia organizada contendo os campos selecionados na ordem SKU, GTIN, descrição, preço e estoque. A prévia MUST usar os índices de coluna selecionados, preservar valores como texto e mostrar somente os registros já contidos na prévia CSV. A prévia CSV original MUST continuar disponível.
+A aplicação MUST mostrar uma prévia organizada contendo os campos selecionados na ordem SKU, GTIN, descrição, preço e estoque. A prévia MUST usar os índices de coluna selecionados, preservar valores como texto e disponibilizar todos os registros do documento CSV aceito em páginas de até 100 registros. A prévia CSV original MUST continuar disponível.
 
 #### Scenario: Preservar o texto de cada célula
 - **WHEN** a pessoa mapeia uma coluna com zeros à esquerda, pontuação ou conteúdo semelhante a fórmula
@@ -41,7 +39,7 @@ A aplicação MUST mostrar uma prévia organizada contendo os campos selecionado
 
 #### Scenario: Prévia CSV tem limite de registros
 - **WHEN** o arquivo tem mais registros que o limite existente da prévia CSV
-- **THEN** a prévia organizada mostra somente os registros já disponíveis, sem reler o arquivo
+- **THEN** a prévia organizada permite navegar por todos os registros já disponíveis no documento, sem reler o arquivo
 
 ### Requirement: Manter mapeamento local e temporário
 O mapeamento e os valores organizados MUST permanecer apenas na memória da página. A aplicação MUST NOT persistir ou enviar mapeamentos e conteúdo CSV. Ao trocar ou limpar o arquivo, MUST descartar o mapeamento e a prévia organizada anteriores.

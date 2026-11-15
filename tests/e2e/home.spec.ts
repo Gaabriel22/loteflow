@@ -2,10 +2,11 @@ import { expect, test } from "@playwright/test"
 
 test("página inicial informa o estado do produto em telas desktop e mobile", async ({
   page,
+  baseURL,
 }) => {
   const externalRequests: string[] = []
   page.on("request", (request) => {
-    if (new URL(request.url()).host !== "127.0.0.1:3100") {
+    if (new URL(request.url()).origin !== new URL(baseURL!).origin) {
       externalRequests.push(request.url())
     }
   })

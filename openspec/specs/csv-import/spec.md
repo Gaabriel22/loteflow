@@ -24,7 +24,7 @@ A aplicação MUST permitir selecionar um único arquivo `.csv` local, vazio ou 
 
 ### Requirement: Pré-visualizar registros CSV sem alteração
 
-A aplicação MUST interpretar a primeira linha como cabeçalho, preservar todas as células como texto e mostrar até 100 registros e todas as colunas em uma tabela. MUST detectar vírgula, ponto e vírgula ou tabulação respeitando campos entre aspas. A aplicação MUST informar total de registros e erros de parsing encontrados.
+A aplicação MUST interpretar a primeira linha como cabeçalho, preservar todas as células como texto e disponibilizar todos os registros aceitos em páginas de até 100 registros, com todas as colunas. MUST detectar vírgula, ponto e vírgula ou tabulação respeitando campos entre aspas. A aplicação MUST informar total de registros e erros de parsing encontrados.
 
 #### Scenario: Ler CSV com aspas e delimitador reconhecido
 
@@ -34,7 +34,7 @@ A aplicação MUST interpretar a primeira linha como cabeçalho, preservar todas
 #### Scenario: Prévia excede o limite visível
 
 - **WHEN** o arquivo contém mais de 100 registros
-- **THEN** a aplicação informa o total e mostra apenas os primeiros 100 registros
+- **THEN** a aplicação informa o total e permite navegar por todos os registros, mostrando até 100 por página
 
 #### Scenario: CSV contém erro de parsing
 

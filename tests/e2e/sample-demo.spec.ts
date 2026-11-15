@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test"
 
-test("carrega a demonstração fictícia sem enviar dados", async ({ page }) => {
+test("carrega a demonstração fictícia sem enviar dados", async ({
+  page,
+  baseURL,
+}) => {
   const externalRequests: string[] = []
   const requests: string[] = []
   const consoleErrors: string[] = []
@@ -10,7 +13,7 @@ test("carrega a demonstração fictícia sem enviar dados", async ({ page }) => 
   page.on("pageerror", (error) => consoleErrors.push(error.message))
   page.on("request", (request) => {
     requests.push(request.url())
-    if (new URL(request.url()).host !== "127.0.0.1:3100") {
+    if (new URL(request.url()).origin !== new URL(baseURL!).origin) {
       externalRequests.push(request.url())
     }
   })

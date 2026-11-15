@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useDeferredValue, useMemo, useState } from "react"
+import { CsvPagination } from "@/components/csv-pagination"
+import { getPageWindow } from "@/domain/pagination"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { CsvReportExport } from "@/components/csv-report-export"
@@ -34,11 +36,11 @@ function getScopeMessage(analyzedCount: number, totalRecordCount: number) {
   const unexaminedCount = Math.max(totalRecordCount - analyzedCount, 0)
 
   if (analyzedCount === 0) {
-    return "O arquivo não tem registros na prévia para analisar."
+    return "O arquivo não tem registros para analisar."
   }
 
   const recordWord = analyzedCount === 1 ? "registro" : "registros"
-  const scope = `A análise cobre ${formatCount(analyzedCount)} ${recordWord} da prévia.`
+  const scope = `A análise cobre ${formatCount(analyzedCount)} ${recordWord} do arquivo.`
 
   if (unexaminedCount === 0) {
     return `${scope} Todos os registros do arquivo estão incluídos na análise.`
@@ -59,6 +61,8 @@ function ValidationFindingsTable({
   validation: ProductValidation<ProductValues>
   fields: readonly { key: ProductField; label: string }[]
 }) {
+  const [page, setPage] = useState(0)
+  const { offset, end } = getPageWindow(validation.records.length, page)
   return (
     <div className="min-w-0">
       <h4
@@ -92,39 +96,47 @@ function ValidationFindingsTable({
           </TableRow>
         </TableHeader>
         <TableBody className="divide-y divide-border">
-          {validation.records.map(({ product, recordIndex, findings }) => (
-            <TableRow className="align-top" key={recordIndex}>
-              <TableHead
-                className="px-4 py-3 font-medium tabular-nums text-foreground"
-                scope="row"
-              >
-                {recordIndex + 1}
-              </TableHead>
-              {fields.map((field) => (
-                <TableCell
-                  className="max-w-72 px-4 py-3 whitespace-pre-wrap text-foreground"
-                  key={field.key}
+          {validation.records
+            .slice(offset, end)
+            .map(({ product, recordIndex, findings }) => (
+              <TableRow className="align-top" key={recordIndex}>
+                <TableHead
+                  className="px-4 py-3 font-medium tabular-nums text-foreground"
+                  scope="row"
                 >
-                  {product[field.key]}
+                  {recordIndex + 1}
+                </TableHead>
+                {fields.map((field) => (
+                  <TableCell
+                    className="max-w-72 px-4 py-3 whitespace-pre-wrap text-foreground"
+                    key={field.key}
+                  >
+                    {product[field.key]}
+                  </TableCell>
+                ))}
+                <TableCell className="px-4 py-3">
+                  <ul className="grid gap-2">
+                    {findings.map(({ field, message }) => (
+                      <li
+                        className="flex flex-wrap items-center gap-2 leading-5"
+                        key={`${field}-${message}`}
+                      >
+                        <Badge variant="outline">{field}</Badge>
+                        <span className="text-muted-foreground">{message}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </TableCell>
-              ))}
-              <TableCell className="px-4 py-3">
-                <ul className="grid gap-2">
-                  {findings.map(({ field, message }) => (
-                    <li
-                      className="flex flex-wrap items-center gap-2 leading-5"
-                      key={`${field}-${message}`}
-                    >
-                      <Badge variant="outline">{field}</Badge>
-                      <span className="text-muted-foreground">{message}</span>
-                    </li>
-                  ))}
-                </ul>
-              </TableCell>
-            </TableRow>
-          ))}
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
+      <CsvPagination
+        label="Paginação dos apontamentos"
+        totalCount={validation.records.length}
+        page={page}
+        onPageChange={setPage}
+      />
     </div>
   )
 }
@@ -137,9 +149,19 @@ export function CsvValidationResults({
   totalRecordCount: number
 }) {
   const [filter, setFilter] = useState<FindingsFilter>({ field: "", query: "" })
-  const mappedFields = mappedPreview.fields.map(({ key }) => key)
-  const validation = validateProducts(mappedPreview.products, mappedFields)
-  const visibleValidation = filterFindings(validation, filter)
+  const deferredFilter = useDeferredValue(filter)
+  const validation = useMemo(
+    () =>
+      validateProducts(
+        mappedPreview.products,
+        mappedPreview.fields.map(({ key }) => key),
+      ),
+    [mappedPreview],
+  )
+  const visibleValidation = useMemo(
+    () => filterFindings(validation, deferredFilter),
+    [validation, deferredFilter],
+  )
 
   return (
     <section
@@ -151,7 +173,7 @@ export function CsvValidationResults({
           className="text-base font-semibold text-foreground"
           id="csv-validation-title"
         >
-          Validação genérica da prévia
+          Validação genérica do arquivo
         </h3>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           As regras se aplicam somente aos campos mapeados e não alteram os
@@ -160,7 +182,7 @@ export function CsvValidationResults({
       </div>
 
       <Alert className="bg-muted/60" role="note">
-        <AlertTitle>Limite da análise</AlertTitle>
+        <AlertTitle>Escopo da análise</AlertTitle>
         <AlertDescription>
           {getScopeMessage(validation.recordCount, totalRecordCount)}
         </AlertDescription>
@@ -176,6 +198,12 @@ export function CsvValidationResults({
         para revisar: {formatCount(validation.affectedRecordCount)}.
         Apontamentos: {formatCount(validation.findingCount)}.
       </p>
+
+      {deferredFilter !== filter && (
+        <p aria-live="polite" className="text-sm text-muted-foreground">
+          Atualizando filtros…
+        </p>
+      )}
 
       <CsvReportExport
         fields={mappedPreview.fields}
@@ -202,6 +230,7 @@ export function CsvValidationResults({
 
       {visibleValidation.records.length > 0 ? (
         <ValidationFindingsTable
+          key={`${deferredFilter.field}:${deferredFilter.query}`}
           fields={mappedPreview.fields}
           validation={visibleValidation}
         />

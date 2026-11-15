@@ -102,7 +102,7 @@ test("limita a prévia a 100 registros e informa o total", async ({ page }) => {
     "105 registros e 2 colunas",
   )
   await expect(page.locator("#csv-import-status")).toContainText(
-    "A prévia mostra os primeiros 100 registros.",
+    "Consulte todos os registros em páginas de até 100.",
   )
   await expect(page.locator("tbody tr")).toHaveCount(100)
 })

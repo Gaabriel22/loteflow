@@ -25,7 +25,7 @@ test("combina filtros sem alterar análise ou relatório, e permite limpar", asy
       .click()
   }
   const results = page.getByRole("region", {
-    name: "Validação genérica da prévia",
+    name: "Validação genérica do arquivo",
     exact: true,
   })
   const search = page.getByLabel("Buscar nos apontamentos", { exact: true })
@@ -50,7 +50,7 @@ test("combina filtros sem alterar análise ou relatório, e permite limpar", asy
   const downloading = page.waitForEvent("download")
   await page
     .getByRole("button", {
-      name: "Baixar relatório CSV da prévia",
+      name: "Baixar relatório CSV",
       exact: true,
     })
     .click()
