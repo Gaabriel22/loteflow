@@ -1,5 +1,7 @@
 # LoteFlow
 
+Consulte o [roteiro do MVP e as decisões do projeto](docs/ROADMAP.md) antes de iniciar a próxima change.
+
 Ferramenta em construção para ajudar lojistas a preparar planilhas de produtos antes da importação. A página oferece uma demonstração fictícia e leitura local de CSV com mapeamento manual de colunas para campos genéricos de produto.
 
 ## Requisitos
@@ -59,6 +61,8 @@ Os componentes locais foram gerados com shadcn CLI `4.23.0`; o código está ver
 Build de produção em 2026-11-09: rota `/` estática; `.next/static` gerou 12 arquivos, com 578.645 bytes de JavaScript e 620.603 bytes totais sem compressão. Valores descrevem artefatos locais deste build; não são metas nem estimam o tamanho transferido pela rede. Recalcule após mudanças no shell ou nas dependências.
 
 ## Arquitetura e privacidade
+
+CSV reconhece vírgula, ponto e vírgula e tabulação, incluindo campos entre aspas. Antes do parsing, a aplicação verifica todos os bytes com decodificação UTF-8 estrita em blocos. Aceita BOM UTF-8; rejeita sequências inválidas ou incompletas e conteúdo com NUL. Não adivinha nem converte outras codificações: salve uma cópia CSV em UTF-8 e selecione novamente. A validação não mantém outra cópia integral do texto; o parsing continua no Web Worker.
 
 As páginas públicas começam como Server Components. Não há API, backend, banco, analytics ou upload remoto. A prévia CSV é processada no navegador; arquivos e conteúdo não são enviados a servidores, logs ou analytics. A leitura aceita CSV UTF-8 de até 10 MiB e 100 colunas, e mostra até 100 registros. Células são dados não confiáveis. Renderize-as como texto e nunca execute fórmulas/macros ou injete HTML/SVG.
 

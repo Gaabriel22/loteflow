@@ -76,7 +76,13 @@ function getCompletionMessage(preview: CsvPreview): string {
   return `Leitura concluída. ${recordCount} ${getRecordLabel(preview.totalRecordCount)} e ${columnCount} colunas.${malformedMessage}${previewMessage}`
 }
 
-function getParseOutcomeMessage(kind: "missing-header" | "too-many-columns") {
+function getParseOutcomeMessage(
+  kind: "missing-header" | "too-many-columns" | "unsupported-encoding",
+) {
+  if (kind === "unsupported-encoding") {
+    return "O arquivo contém texto incompatível com CSV em UTF-8. Salve uma cópia CSV em UTF-8 e selecione-a novamente."
+  }
+
   if (kind === "missing-header") {
     return "A primeira linha precisa conter os nomes das colunas. Salve o CSV com cabeçalho e tente novamente."
   }

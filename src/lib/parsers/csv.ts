@@ -1,4 +1,5 @@
 import { MAX_CSV_COLUMN_COUNT, MAX_CSV_PREVIEW_ROWS } from "./csv-file"
+import { validateCsvEncoding } from "./csv-encoding"
 
 export type CsvPreview = {
   headers: string[]
@@ -12,8 +13,13 @@ export type CsvParseOutcome =
   | { kind: "ready"; preview: CsvPreview }
   | { kind: "missing-header" }
   | { kind: "too-many-columns" }
+  | { kind: "unsupported-encoding" }
 
-export function parseCsvFile(file: File): Promise<CsvParseOutcome> {
+export async function parseCsvFile(file: File): Promise<CsvParseOutcome> {
+  if (!(await validateCsvEncoding(file))) {
+    return { kind: "unsupported-encoding" }
+  }
+
   return import("papaparse").then(
     ({ parse }) =>
       new Promise((resolve, reject) => {
@@ -35,7 +41,7 @@ export function parseCsvFile(file: File): Promise<CsvParseOutcome> {
             dynamicTyping: false,
             skipEmptyLines: false,
             delimiter: "",
-            delimitersToGuess: [",", ";"],
+            delimitersToGuess: [",", ";", "\t"],
             step: ({ data, errors }, parser) => {
               if (data.length > MAX_CSV_COLUMN_COUNT) {
                 hasTooManyColumns = true
