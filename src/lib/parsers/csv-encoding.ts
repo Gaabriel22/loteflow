@@ -15,13 +15,19 @@ function isCompatibleChunk(
   }
 }
 
-export async function validateCsvEncoding(file: Blob): Promise<boolean> {
+export async function validateCsvEncoding(
+  file: Blob,
+  onProgress?: (bytesRead: number) => void,
+): Promise<boolean> {
   const reader = file.stream().getReader()
   const decoder = new TextDecoder("utf-8", { fatal: true })
+  let bytesRead = 0
 
   try {
     while (true) {
       const { done, value } = await reader.read()
+      bytesRead += value?.byteLength ?? 0
+      onProgress?.(bytesRead)
 
       if (!isCompatibleChunk(decoder, value)) {
         return false

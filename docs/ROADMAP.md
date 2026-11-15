@@ -8,7 +8,7 @@ Landing page, demonstração fictícia, leitura local de CSV, mapeamento, valida
 
 ## Changes previstas
 
-A estimativa inicial foi de 12 changes. A etapa 1, `leitura-csv-completa`, está implementada e arquivada; restam **11 changes**, mais uma opcional para analytics. A divisão pode mudar conforme os requisitos forem detalhados no OpenSpec; os demais nomes abaixo são sugestões, não changes já criadas.
+A estimativa inicial foi de 12 changes. As etapas 1, `leitura-csv-completa`, e 2, `processamento-integral-csv`, estão implementadas e arquivadas. Restam **10 próximas changes**, mais uma opcional para analytics. A divisão pode mudar conforme os requisitos forem detalhados no OpenSpec; os demais nomes abaixo são sugestões, não changes já criadas.
 
 | Ordem | Change sugerida                  | Resultado esperado                                                                                                                    |
 | ----- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -43,4 +43,4 @@ Decisão explícita: reservar uma change dedicada a deixar o produto mais bonito
 
 ## Como continuar
 
-Próxima etapa: priorizar `processamento-integral-csv` para superar o limite funcional da prévia. Manter cada entrega no fluxo OpenSpec: proposta, especificações, implementação, verificação, sincronização e arquivamento. Atualizar este roteiro conforme as etapas forem concluídas ou o escopo mudar.
+Próxima etapa: priorizar `paginacao-revisao-registros` para levar edição, análise, filtros e relatório ao documento completo. Manter cada entrega no fluxo OpenSpec: proposta, especificações, implementação, verificação, sincronização e arquivamento. Atualizar este roteiro conforme as etapas forem concluídas ou o escopo mudar.

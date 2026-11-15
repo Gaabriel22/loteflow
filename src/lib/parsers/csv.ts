@@ -1,130 +1,88 @@
-import { MAX_CSV_COLUMN_COUNT, MAX_CSV_PREVIEW_ROWS } from "./csv-file"
-import { validateCsvEncoding } from "./csv-encoding"
+import { resolveCsvLimits, type CsvImportLimits } from "./csv-file"
+import type {
+  CsvParseOutcome,
+  CsvProcessingProgress,
+  CsvWorkerMessage,
+} from "./csv-types"
 
-export type CsvPreview = {
-  headers: string[]
-  rows: string[][]
-  totalRecordCount: number
-  malformedRecordCount: number
-  columnCount: number
+export type {
+  CsvPreview,
+  CsvDocument,
+  CsvParseOutcome,
+  CsvProcessingProgress,
+} from "./csv-types"
+
+type CsvParseOptions = {
+  signal?: AbortSignal
+  onProgress?: (progress: CsvProcessingProgress) => void
+  limits?: Partial<CsvImportLimits>
 }
 
-export type CsvParseOutcome =
-  | { kind: "ready"; preview: CsvPreview }
-  | { kind: "missing-header" }
-  | { kind: "too-many-columns" }
-  | { kind: "unsupported-encoding" }
+export async function parseCsvFile(
+  file: File,
+  options: CsvParseOptions = {},
+): Promise<CsvParseOutcome> {
+  if (options.signal?.aborted)
+    throw new DOMException("Leitura cancelada", "AbortError")
+  const limits = resolveCsvLimits(options.limits)
 
-export async function parseCsvFile(file: File): Promise<CsvParseOutcome> {
-  if (!(await validateCsvEncoding(file))) {
-    return { kind: "unsupported-encoding" }
-  }
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(
+      new URL("../../workers/csv-import.worker.ts", import.meta.url),
+      { type: "module" },
+    )
+    let settled = false
 
-  return import("papaparse").then(
-    ({ parse }) =>
-      new Promise((resolve, reject) => {
-        let recordIndex = 0
-        let headers: string[] = []
-        let columnCount = 0
-        let totalRecordCount = 0
-        let malformedRecordCount = 0
-        let trailingEmptyRecordCount = 0
-        let trailingEmptyMalformedRecordCount = 0
-        const rows: string[][] = []
-        let hasMissingHeader = false
-        let hasTooManyColumns = false
+    function cleanup() {
+      worker.terminate()
+      worker.onmessage = null
+      worker.onerror = null
+      worker.onmessageerror = null
+      options.signal?.removeEventListener("abort", handleAbort)
+    }
 
-        try {
-          parse<string[]>(file, {
-            worker: true,
-            header: false,
-            dynamicTyping: false,
-            skipEmptyLines: false,
-            delimiter: "",
-            delimitersToGuess: [",", ";", "\t"],
-            step: ({ data, errors }, parser) => {
-              if (data.length > MAX_CSV_COLUMN_COUNT) {
-                hasTooManyColumns = true
-                parser.abort()
-                return
-              }
+    function finish(outcome?: CsvParseOutcome, error?: unknown) {
+      if (settled) return
+      settled = true
+      cleanup()
+      if (outcome) resolve(outcome)
+      else reject(error)
+    }
 
-              columnCount = Math.max(columnCount, data.length)
+    function handleAbort() {
+      finish(undefined, new DOMException("Leitura cancelada", "AbortError"))
+    }
 
-              if (recordIndex === 0) {
-                if (data.every((value) => value.trim() === "")) {
-                  hasMissingHeader = true
-                  parser.abort()
-                  return
-                }
-
-                headers = data.map((value, index) =>
-                  index === 0 ? value.replace(/^\uFEFF/, "") : value,
-                )
-                recordIndex += 1
-                return
-              }
-
-              totalRecordCount += 1
-              const isEmptyRecord = data.every((value) => value.trim() === "")
-              trailingEmptyRecordCount = isEmptyRecord
-                ? trailingEmptyRecordCount + 1
-                : 0
-
-              if (errors.length > 0 || data.length !== headers.length) {
-                malformedRecordCount += 1
-                trailingEmptyMalformedRecordCount = isEmptyRecord
-                  ? trailingEmptyMalformedRecordCount + 1
-                  : 0
-              } else {
-                trailingEmptyMalformedRecordCount = 0
-              }
-
-              if (rows.length < MAX_CSV_PREVIEW_ROWS) {
-                rows.push(data)
-              }
-
-              recordIndex += 1
-            },
-            complete: () => {
-              if (hasTooManyColumns) {
-                resolve({ kind: "too-many-columns" })
-                return
-              }
-
-              if (hasMissingHeader || headers.length === 0) {
-                resolve({ kind: "missing-header" })
-                return
-              }
-
-              totalRecordCount -= trailingEmptyRecordCount
-              malformedRecordCount -= trailingEmptyMalformedRecordCount
-
-              while (
-                rows.length > 0 &&
-                rows[rows.length - 1].every((value) => value.trim() === "")
-              ) {
-                rows.pop()
-              }
-
-              resolve({
-                kind: "ready",
-                preview: {
-                  headers,
-                  rows,
-                  totalRecordCount,
-                  malformedRecordCount,
-                  columnCount,
-                },
-              })
-            },
-            error: (error) => reject(error),
-          })
-        } catch (error) {
-          reject(error)
-        }
-      }),
-  )
+    worker.onmessage = (event: MessageEvent<CsvWorkerMessage>) => {
+      if (settled) return
+      try {
+        if (event.data.type === "progress")
+          options.onProgress?.(event.data.progress)
+        else if (event.data.type === "result") finish(event.data.outcome)
+        else finish(undefined, new Error("Não foi possível processar o CSV."))
+      } catch (error) {
+        finish(undefined, error)
+      }
+    }
+    worker.onerror = (event) => {
+      event.preventDefault()
+      finish(
+        undefined,
+        new Error("Não foi possível iniciar ou executar a leitura."),
+      )
+    }
+    worker.onmessageerror = () =>
+      finish(
+        undefined,
+        new Error("Não foi possível receber o resultado da leitura."),
+      )
+    options.signal?.addEventListener("abort", handleAbort, { once: true })
+    try {
+      worker.postMessage({ file, limits })
+    } catch (error) {
+      finish(undefined, error)
+    }
+  })
 }
 
 export function getColumnLabel(header: string, index: number): string {

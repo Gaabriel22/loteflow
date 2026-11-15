@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type ChangeEvent } from "react"
+import { useEffect, useRef, useState, type ChangeEvent } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,10 +25,14 @@ import {
   getColumnLabel,
   parseCsvFile,
   type CsvPreview,
+  type CsvDocument,
+  type CsvProcessingProgress,
 } from "@/lib/parsers/csv"
+import type { CsvParseIssue } from "@/lib/parsers/csv-types"
 import {
   MAX_CSV_COLUMN_COUNT,
   MAX_CSV_PREVIEW_ROWS,
+  MAX_CSV_RECORDS,
   validateCsvFile,
 } from "@/lib/parsers/csv-file"
 
@@ -76,9 +80,17 @@ function getCompletionMessage(preview: CsvPreview): string {
   return `Leitura concluída. ${recordCount} ${getRecordLabel(preview.totalRecordCount)} e ${columnCount} colunas.${malformedMessage}${previewMessage}`
 }
 
-function getParseOutcomeMessage(
-  kind: "missing-header" | "too-many-columns" | "unsupported-encoding",
-) {
+function getParseOutcomeMessage(kind: CsvParseIssue) {
+  if (kind === "too-many-records") {
+    return `O arquivo tem mais de ${new Intl.NumberFormat("pt-BR").format(MAX_CSV_RECORDS)} registros. Reduza ou divida o arquivo e selecione-o novamente.`
+  }
+  if (
+    kind === "empty" ||
+    kind === "too-large" ||
+    kind === "unsupported-extension"
+  ) {
+    return getFileIssueMessage(kind)
+  }
   if (kind === "unsupported-encoding") {
     return "O arquivo contém texto incompatível com CSV em UTF-8. Salve uma cópia CSV em UTF-8 e selecione-a novamente."
   }
@@ -151,13 +163,39 @@ function CsvPreviewTable({ preview }: { preview: CsvPreview }) {
 }
 
 export function CsvImport() {
-  const [preview, setPreview] = useState<CsvPreview | null>(null)
+  const [csvDocument, setCsvDocument] = useState<CsvDocument | null>(null)
+  const preview = csvDocument
+    ? { ...csvDocument, rows: csvDocument.rows.slice(0, MAX_CSV_PREVIEW_ROWS) }
+    : null
+  const activeRead = useRef<AbortController | null>(null)
+  const fileInput = useRef<HTMLInputElement>(null)
   const [selectedFileName, setSelectedFileName] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
   const [isReading, setIsReading] = useState(false)
   const [statusMessage, setStatusMessage] = useState(
     "Selecione um arquivo CSV para consultar uma prévia local.",
   )
+
+  useEffect(
+    () => () => {
+      const controller = activeRead.current
+      activeRead.current = null
+      controller?.abort()
+    },
+    [],
+  )
+
+  function cancelReading() {
+    const controller = activeRead.current
+    activeRead.current = null
+    controller?.abort()
+    setCsvDocument(null)
+    setIsReading(false)
+    setStatusMessage(
+      "Leitura cancelada. Selecione um arquivo para tentar novamente.",
+    )
+    requestAnimationFrame(() => fileInput.current?.focus())
+  }
 
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const input = event.currentTarget
@@ -168,7 +206,9 @@ export function CsvImport() {
       return
     }
 
-    setPreview(null)
+    activeRead.current?.abort()
+    activeRead.current = null
+    setCsvDocument(null)
     setSelectedFileName(file.name)
     setErrorMessage("")
     setStatusMessage("")
@@ -182,9 +222,25 @@ export function CsvImport() {
 
     setIsReading(true)
     setStatusMessage("Lendo o arquivo CSV no navegador.")
+    const controller = new AbortController()
+    activeRead.current = controller
+
+    function handleProgress(progress: CsvProcessingProgress) {
+      if (activeRead.current !== controller) return
+      const format = new Intl.NumberFormat("pt-BR")
+      setStatusMessage(
+        progress.phase === "encoding"
+          ? `Validando UTF-8: ${format.format(progress.bytesRead)} de ${format.format(progress.totalBytes)} bytes verificados.`
+          : `Processando CSV: ${format.format(progress.recordCount)} registros lidos.`,
+      )
+    }
 
     try {
-      const outcome = await parseCsvFile(file)
+      const outcome = await parseCsvFile(file, {
+        signal: controller.signal,
+        onProgress: handleProgress,
+      })
+      if (activeRead.current !== controller) return
 
       if (outcome.kind !== "ready") {
         setErrorMessage(getParseOutcomeMessage(outcome.kind))
@@ -192,20 +248,24 @@ export function CsvImport() {
         return
       }
 
-      setPreview(outcome.preview)
-      setStatusMessage(getCompletionMessage(outcome.preview))
+      setCsvDocument(outcome.document)
+      setStatusMessage(getCompletionMessage(outcome.document))
     } catch {
+      if (activeRead.current !== controller) return
       setErrorMessage(
         "Não foi possível ler o arquivo. Confira se o CSV está codificado em UTF-8 e selecione-o novamente.",
       )
       setStatusMessage("")
     } finally {
-      setIsReading(false)
+      if (activeRead.current === controller) {
+        activeRead.current = null
+        setIsReading(false)
+      }
     }
   }
 
   function clearSelection() {
-    setPreview(null)
+    setCsvDocument(null)
     setSelectedFileName("")
     setErrorMessage("")
     setStatusMessage(
@@ -240,8 +300,8 @@ export function CsvImport() {
               Abrir arquivo CSV
             </CardTitle>
             <CardDescription className="leading-6">
-              Escolha um arquivo UTF-8 de até 10 MiB e 100 colunas. A tabela
-              mostra até 100 registros.
+              Escolha um arquivo UTF-8 de até 10 MiB, 20.000 registros e 100
+              colunas. A tabela mostra até 100 registros.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid min-w-0 gap-5 pt-5">
@@ -258,14 +318,15 @@ export function CsvImport() {
                 disabled={isReading}
                 id="csv-file"
                 onChange={handleFileChange}
+                ref={fileInput}
                 type="file"
               />
               <p
                 className="text-sm leading-6 text-muted-foreground"
                 id="csv-file-help"
               >
-                CSV em UTF-8, até 10 MiB e 100 colunas. O conteúdo não é enviado
-                nem salvo.
+                CSV em UTF-8, até 10 MiB, 20.000 registros e 100 colunas. O
+                conteúdo não é enviado nem salvo.
               </p>
             </div>
 
@@ -294,6 +355,24 @@ export function CsvImport() {
             >
               {statusMessage}
             </p>
+
+            {isReading && (
+              <Button
+                onClick={cancelReading}
+                type="button"
+                variant="outline"
+                className="justify-self-start"
+              >
+                Cancelar leitura
+              </Button>
+            )}
+            {preview && (
+              <p className="text-sm text-muted-foreground">
+                O documento completo está na memória desta página. Edição,
+                análise e relatório ainda cobrem somente os primeiros{" "}
+                {MAX_CSV_PREVIEW_ROWS} registros.
+              </p>
+            )}
 
             {errorMessage && (
               <Alert className="bg-destructive/5" variant="destructive">
