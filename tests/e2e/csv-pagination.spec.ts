@@ -12,7 +12,7 @@ test("edita registro 101 sem alterar registro 1 e exporta análise entre página
   )
   rows[100] = "SKU-1;Produto 101;inválido"
   rows[204] = "SKU-205;Produto 205;inválido"
-  await page.getByLabel("Arquivo CSV", { exact: true }).setInputFiles({
+  await page.getByLabel("Arquivo CSV ou XLSX", { exact: true }).setInputFiles({
     name: "paginas.csv",
     mimeType: "text/csv",
     buffer: Buffer.from(["SKU;Descrição;Preço", ...rows].join("\n")),
@@ -66,7 +66,7 @@ test("edita registro 101 sem alterar registro 1 e exporta análise entre página
   await raw.getByRole("button", { name: "Próxima página", exact: true }).focus()
   await page.keyboard.press("Enter")
   const original = page.getByRole("region", {
-    name: "Prévia CSV. Role na horizontal para consultar todas as colunas.",
+    name: "Prévia do arquivo. Role na horizontal para consultar todas as colunas.",
     exact: true,
   })
   await expect(
@@ -96,7 +96,7 @@ test("pagina apontamentos, reinicia com filtros e limita página quando lista en
   page,
 }) => {
   await page.goto("/#importar-csv")
-  await page.getByLabel("Arquivo CSV", { exact: true }).setInputFiles({
+  await page.getByLabel("Arquivo CSV ou XLSX", { exact: true }).setInputFiles({
     name: "apontamentos.csv",
     mimeType: "text/csv",
     buffer: Buffer.from(
@@ -163,7 +163,7 @@ test("cancela relatório e troca arquivo sem download tardio", async ({
   page,
 }) => {
   await page.goto("/#importar-csv")
-  const file = page.getByLabel("Arquivo CSV", { exact: true })
+  const file = page.getByLabel("Arquivo CSV ou XLSX", { exact: true })
   await file.setInputFiles("tests/fixtures/validacao-previa.csv")
   await page.getByRole("combobox", { name: "SKU", exact: true }).click()
   await page.getByRole("option", { name: "Coluna 1: SKU", exact: true }).click()

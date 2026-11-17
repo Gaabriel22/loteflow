@@ -2,7 +2,7 @@
 
 Consulte o [roteiro do MVP e as decisões do projeto](docs/ROADMAP.md) antes de iniciar a próxima change.
 
-Ferramenta em construção para ajudar lojistas a preparar planilhas de produtos antes da importação. A página oferece uma demonstração fictícia e leitura local de CSV com mapeamento manual de colunas para campos genéricos de produto.
+Ferramenta em construção para ajudar lojistas a preparar planilhas de produtos antes da importação. A página oferece uma demonstração fictícia e leitura local de CSV ou XLSX com mapeamento manual de colunas para campos genéricos de produto.
 
 ## Requisitos
 
@@ -38,13 +38,23 @@ npx playwright install chromium
 
 - `src/app/`: página, layout, metadados, robots e sitemap.
 - `src/components/ui/`: componentes shadcn/ui usados pela interface.
-- `src/lib/parsers/`: leitura local de CSV.
+- `src/lib/parsers/`: leitura local de CSV e XLSX, com validação de arquivo e ZIP.
 - `src/domain/product-mapping/`: regras puras para mapear colunas CSV a campos genéricos.
 - `src/lib/`: utilitários compartilhados.
 - `tests/unit/`: testes de funções puras.
 - `tests/e2e/`: smoke test responsivo e varredura axe.
 
 `src/lib/export/` gera relatórios e inicia downloads locais. Papa Parse lê CSV em Web Worker.
+
+## Abrir XLSX
+
+Selecione um `.xlsx`, escolha uma aba no seletor e use **Abrir aba**. A revisão e o relatório incluem somente essa aba. Trocar de aba descarta mapeamento, edições e filtros anteriores. A primeira linha é o cabeçalho; linhas vazias internas permanecem. XLS, XLSM e arquivos com senha não são aceitos.
+
+Textos mantêm os valores, inclusive zeros à esquerda. Números com formatos de zeros, como `00000`, preservam esses zeros; números gerais usam texto decimal e datas usam representação formatada. Não é possível recuperar dígitos ou zeros já perdidos no programa de planilhas. Abas com fórmulas, mesmo com resultados salvos, erros ou células mescladas são recusadas: salve uma cópia só com valores e desfaça as mesclagens. Nenhuma fórmula, macro, link ou HTML é executado.
+
+SheetJS CE 0.20.3 (Apache-2.0) vem do [CDN oficial documentado](https://docs.sheetjs.com/docs/getting-started/installation/nodejs/), com integridade no lockfile. O pacote público npm `xlsx` está desatualizado. Para reinstalações com npm 12 e `allow-remote=none`, permita dependências remotas diretas apenas nesse comando: `npm ci --allow-remote=root`. Não é necessário alterar a configuração global. fflate 0.8.3 (MIT) inspeciona o ZIP e faz descompressão incremental com limites; o arquivo normalizado é entregue ao SheetJS. Ambas ficam no Worker carregado sob demanda, sem CDN em runtime.
+
+Limites XLSX: 10 MiB comprimidos, 64 MiB expandidos, 32 MiB por parte, 2.048 entradas ZIP, 50 abas e 60 segundos ativos por operação. Cada aba aceita até 20.000 registros e 100 colunas. Arquivos fora dos limites são recusados integralmente. **Cancelar leitura** encerra o Worker; limpar ou trocar arquivo descarta dados e operações anteriores.
 
 ## Revisão paginada e relatório CSV
 
@@ -78,4 +88,6 @@ Metadados, Open Graph, robots e sitemap descrevem apenas a página pública atua
 
 ## Limites desta fundação
 
-O mapeamento e a edição manual são temporários no navegador. A validação genérica e o relatório cobrem todo o documento aceito. Não há detecção automática, leitura XLSX, regras de ERP, perfil Bling, exportação completa de produtos ou promessa de compatibilidade. A auditoria axe não comprova conformidade WCAG 2.2 AA; ela complementa testes por teclado e revisão manual.
+O mapeamento e a edição manual são temporários no navegador. A validação genérica e o relatório cobrem todo o CSV ou a aba XLSX aberta. Não há detecção automática, regras de ERP, perfil Bling, exportação completa de produtos ou promessa de compatibilidade. A auditoria axe não comprova conformidade WCAG 2.2 AA; ela complementa testes por teclado e revisão manual.
+
+A hospedagem prevista é Cloudflare. A etapa de publicação verificará build, headers/CSP, módulos Worker e domínio no ambiente real, conforme o [roadmap](docs/ROADMAP.md#hospedagem-na-cloudflare).

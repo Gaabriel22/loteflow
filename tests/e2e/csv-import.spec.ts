@@ -8,7 +8,7 @@ test("lê CSV local e mostra valores como texto", async ({ page }) => {
 
   await page.goto("/#importar-csv")
   const requestCountBeforeSelection = requests.length
-  const fileInput = page.getByLabel("Arquivo CSV", { exact: true })
+  const fileInput = page.getByLabel("Arquivo CSV ou XLSX", { exact: true })
 
   await fileInput.setInputFiles("tests/fixtures/produtos.csv")
 
@@ -44,15 +44,15 @@ test("rejeita arquivo vazio, extensão não aceita e mais de 10 MiB", async ({
   page,
 }) => {
   await page.goto("/#importar-csv")
-  const fileInput = page.getByLabel("Arquivo CSV", { exact: true })
+  const fileInput = page.getByLabel("Arquivo CSV ou XLSX", { exact: true })
 
   await fileInput.setInputFiles({
-    name: "produtos.xlsx",
+    name: "produtos.xls",
     mimeType: "text/csv",
     buffer: Buffer.from("SKU,Nome\n1,Café"),
   })
   await expect(page.locator("#importar-csv").getByRole("alert")).toContainText(
-    "Selecione um arquivo com extensão .csv.",
+    "Selecione um arquivo com extensão .csv ou .xlsx.",
   )
 
   await fileInput.setInputFiles({
@@ -92,7 +92,7 @@ test("limita a prévia a 100 registros e informa o total", async ({ page }) => {
   const csv = ["SKU,Produto", ...records].join("\n")
 
   await page.goto("/#importar-csv")
-  await page.getByLabel("Arquivo CSV", { exact: true }).setInputFiles({
+  await page.getByLabel("Arquivo CSV ou XLSX", { exact: true }).setInputFiles({
     name: "muitos-registros.csv",
     mimeType: "text/csv",
     buffer: Buffer.from(csv),
@@ -110,7 +110,7 @@ test("limita a prévia a 100 registros e informa o total", async ({ page }) => {
 test("avisa sobre registros malformados e rejeita CSV com mais de 100 colunas", async ({
   page,
 }) => {
-  const fileInput = page.getByLabel("Arquivo CSV", { exact: true })
+  const fileInput = page.getByLabel("Arquivo CSV ou XLSX", { exact: true })
   await page.goto("/#importar-csv")
 
   await fileInput.setInputFiles({
@@ -145,13 +145,13 @@ test("mantém rolagem horizontal dentro da tabela em viewport mobile", async ({
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto("/#importar-csv")
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/produtos.csv")
   await expect(page.getByRole("table")).toBeVisible()
 
   const dimensions = await page.evaluate(() => {
     const region = document.querySelector<HTMLElement>(
-      '[aria-label^="Prévia CSV"]',
+      '[aria-label^="Prévia do arquivo"]',
     )
 
     return {
@@ -169,7 +169,7 @@ test("mantém rolagem horizontal dentro da tabela em viewport mobile", async ({
 test("troca arquivo sem mostrar dados anteriores e permite limpar", async ({
   page,
 }) => {
-  const fileInput = page.getByLabel("Arquivo CSV", { exact: true })
+  const fileInput = page.getByLabel("Arquivo CSV ou XLSX", { exact: true })
   await page.goto("/#importar-csv")
 
   await fileInput.setInputFiles("tests/fixtures/produtos.csv")
@@ -187,6 +187,6 @@ test("troca arquivo sem mostrar dados anteriores e permite limpar", async ({
   await expect(page.locator("#importar-csv").getByRole("alert")).toHaveCount(0)
   await expect(page.getByText("invalido.xlsx")).toHaveCount(0)
   await expect(page.locator('#importar-csv [role="status"]')).toContainText(
-    "Selecione um arquivo CSV para consultar uma prévia local.",
+    "Selecione um arquivo CSV ou XLSX para consultar uma prévia local.",
   )
 })

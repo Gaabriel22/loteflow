@@ -74,11 +74,12 @@ function ValidationFindingsTable({
       <Table
         aria-labelledby="csv-validation-results-title"
         className="min-w-160 border-collapse text-left text-sm"
-        containerAriaLabel="Apontamentos da prévia CSV. Role na horizontal para consultar todas as colunas."
+        containerAriaLabel="Apontamentos da prévia do arquivo. Role na horizontal para consultar todas as colunas."
         containerClassName="rounded-lg border border-border"
       >
         <TableCaption className="sr-only">
-          Apontamentos genéricos para os registros mapeados da prévia CSV.
+          Apontamentos genéricos para os registros mapeados da prévia do
+          arquivo.
         </TableCaption>
         <TableHeader className="bg-muted/70 text-xs text-muted-foreground">
           <TableRow>

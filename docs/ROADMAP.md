@@ -4,11 +4,11 @@ Registro das próximas etapas acordadas em 14/11/2026. Base: [especificação in
 
 ## Estado atual
 
-Landing page, demonstração fictícia, leitura local de CSV, mapeamento, validação genérica, edição manual reversível, relatório CSV e filtros de apontamentos estão implementados. A revisão agora cobre todo o documento aceito, com até 100 registros renderizados por página nas tabelas. O relatório integral é gerado em Worker. A configuração do Next.js já inclui cabeçalhos de segurança e CSP.
+Landing page, demonstração fictícia, leitura local de CSV e XLSX com seleção explícita de aba, mapeamento, validação genérica, edição manual reversível, relatório CSV e filtros de apontamentos estão implementados. A revisão cobre todo o documento CSV ou aba XLSX aceita, com até 100 registros renderizados por página nas tabelas. O relatório integral é gerado em Worker. A configuração do Next.js já inclui cabeçalhos de segurança e CSP.
 
 ## Changes previstas
 
-A estimativa inicial foi de 12 changes. As etapas 1, `leitura-csv-completa`, 2, `processamento-integral-csv`, e 3, `paginacao-revisao-registros`, estão arquivadas. Restam **9 próximas changes**, mais uma opcional para analytics. A divisão pode mudar conforme os requisitos forem detalhados no OpenSpec; os demais nomes abaixo são sugestões, não changes já criadas.
+A estimativa inicial foi de 12 changes. As etapas 1, `leitura-csv-completa`, 2, `processamento-integral-csv`, 3, `paginacao-revisao-registros`, e 4, `importacao-xlsx-local`, estão arquivadas. Restam **8 próximas changes**, mais uma opcional para analytics. A divisão pode mudar conforme os requisitos forem detalhados no OpenSpec; os demais nomes abaixo são sugestões, não changes já criadas.
 
 | Ordem | Change sugerida                  | Resultado esperado                                                                                                                    |
 | ----- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -36,6 +36,16 @@ Decisão explícita: reservar uma change dedicada a deixar o produto mais bonito
 - Aplicar também `better-writing` e skills de acessibilidade. Preservar a base shadcn/Tailwind, responsividade, teclado, foco e desempenho.
 - Revisar o resultado visual e funcional com Playwright MCP em mobile e desktop, incluindo ampliação de 200% e suas limitações de verificação.
 
+## Hospedagem na Cloudflare
+
+Decisão de 17/11/2026: hospedar na **Cloudflare**. A etapa `preparacao-publicacao` deve validar o caminho de publicação compatível com a versão de Next.js instalada: saída estática em Workers Static Assets, quando suficiente, ou integração de runtime vigente quando necessária. Não migrar framework nem instalar adaptador durante changes funcionais sem necessidade.
+
+- Confirmar build reproduzível e preview no ambiente Cloudflare antes da publicação.
+- Verificar CSP e demais cabeçalhos no destino; `headers()` do Next.js não substitui a configuração da hospedagem em uma exportação estática.
+- Testar URLs, MIME e cache dos chunks e Web Workers de CSV/XLSX/relatório, incluindo cancelamento e política de mesma origem.
+- Configurar domínio, HTTPS, canonical, sitemap, robots e metadados com o endereço real, preservando processamento dos arquivos no navegador.
+- Conferir documentação oficial e compatibilidade de ferramentas na execução dessa etapa. A [documentação Next.js da Cloudflare](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/) orienta a escolha, que pode mudar até o deploy.
+
 ## Etapas opcionais e posteriores
 
 - **Analytics mínimo:** uma change opcional adicional, com eventos agregados e sem conteúdo, nomes de arquivos ou identificadores de produtos; avaliar consentimento quando aplicável.
@@ -43,4 +53,4 @@ Decisão explícita: reservar uma change dedicada a deixar o produto mais bonito
 
 ## Como continuar
 
-Após concluir e arquivar `paginacao-revisao-registros`, priorizar `importacao-xlsx-local`. Manter cada entrega no fluxo OpenSpec: proposta, especificações, implementação, verificação, sincronização e arquivamento. Atualizar este roteiro conforme as etapas forem concluídas ou o escopo mudar.
+Próxima etapa: `validacoes-genericas-completas`. Manter cada entrega no fluxo OpenSpec: proposta, especificações, implementação, verificação, sincronização e arquivamento. Atualizar este roteiro conforme as etapas forem concluídas ou o escopo mudar.

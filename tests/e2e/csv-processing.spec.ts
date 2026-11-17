@@ -8,7 +8,7 @@ test("aceita 20.000 registros, mantém prévia de 100 e rejeita 20.001 sem resul
     if (request.method() !== "GET") sent.push(request.url())
   })
   await page.goto("/#importar-csv")
-  const file = page.getByLabel("Arquivo CSV", { exact: true })
+  const file = page.getByLabel("Arquivo CSV ou XLSX", { exact: true })
   const records = Array.from(
     { length: 20_000 },
     (_, index) => `SKU-${index},Café ${index},0000${index}`,
@@ -53,7 +53,7 @@ test("cancela Worker por teclado e permite nova seleção sem resultado atrasado
     await new Promise((resolve) => setTimeout(resolve, 500))
     await route.continue()
   })
-  const file = page.getByLabel("Arquivo CSV", { exact: true })
+  const file = page.getByLabel("Arquivo CSV ou XLSX", { exact: true })
   await file.setInputFiles("tests/fixtures/produtos.csv")
   const cancel = page.getByRole("button", {
     name: "Cancelar leitura",
@@ -80,7 +80,7 @@ test("preserva linhas vazias explícitas sem criar registro pelo terminador fina
   page,
 }) => {
   await page.goto("/#importar-csv")
-  const file = page.getByLabel("Arquivo CSV", { exact: true })
+  const file = page.getByLabel("Arquivo CSV ou XLSX", { exact: true })
   await file.setInputFiles({
     name: "vazias.csv",
     mimeType: "text/csv",

@@ -11,7 +11,7 @@ test("mapeia colunas repetidas e preserva os valores originais", async ({
   await page.goto("/#importar-csv")
   const requestCountBeforeSelection = requests.length
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/mapeamento-colunas.csv")
 
   const mapping = page.getByRole("region", {
@@ -55,7 +55,7 @@ test("mapeia colunas repetidas e preserva os valores originais", async ({
 
 test("limpa o mapeamento ao trocar ou limpar arquivo", async ({ page }) => {
   await page.goto("/#importar-csv")
-  const fileInput = page.getByLabel("Arquivo CSV", { exact: true })
+  const fileInput = page.getByLabel("Arquivo CSV ou XLSX", { exact: true })
   await fileInput.setInputFiles("tests/fixtures/mapeamento-colunas.csv")
 
   const mapping = page.getByRole("region", {
@@ -88,7 +88,7 @@ test("abre opções abaixo do seletor sem alinhar itens sobre outros campos", as
 }) => {
   await page.goto("/#importar-csv")
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/mapeamento-colunas.csv")
 
   const mapping = page.getByRole("region", {
@@ -120,7 +120,7 @@ test("permite navegar pelos seletores com teclado e rolar tabela no mobile", asy
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto("/#importar-csv")
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/mapeamento-colunas.csv")
 
   const mapping = page.getByRole("region", {

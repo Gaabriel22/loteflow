@@ -23,7 +23,7 @@ test("valida campos mapeados e preserva dados locais", async ({ page }) => {
   await page.goto("/#importar-csv")
   const requestCountBeforeFile = requests.length
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/validacao-previa.csv")
 
   await selectColumn(page, "SKU", "Coluna 1: SKU")
@@ -68,7 +68,7 @@ test("analisa todo o arquivo, opera por teclado e cabe em viewports estreitos", 
   const records = Array.from({ length: 105 }, (_, index) => `SKU-${index};;;`)
   records[104] = "SKU-0;;;"
 
-  await page.getByLabel("Arquivo CSV", { exact: true }).setInputFiles({
+  await page.getByLabel("Arquivo CSV ou XLSX", { exact: true }).setInputFiles({
     name: "mais-de-100-registros.csv",
     mimeType: "text/csv",
     buffer: Buffer.from(["SKU;Descrição;Preço;Estoque", ...records].join("\n")),
@@ -103,7 +103,7 @@ test("mantém tabela de apontamentos rolável e resultados acessíveis", async (
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto("/#importar-csv")
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/validacao-previa.csv")
 
   await selectColumn(page, "SKU", "Coluna 1: SKU")
@@ -113,7 +113,7 @@ test("mantém tabela de apontamentos rolável e resultados acessíveis", async (
   await selectColumn(page, "Estoque", "Coluna 5: Estoque")
 
   const tableRegion = page.getByRole("region", {
-    name: "Apontamentos da prévia CSV. Role na horizontal para consultar todas as colunas.",
+    name: "Apontamentos da prévia do arquivo. Role na horizontal para consultar todas as colunas.",
   })
   await expect(tableRegion).toBeVisible()
 

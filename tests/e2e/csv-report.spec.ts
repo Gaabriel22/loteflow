@@ -8,7 +8,7 @@ test("baixa relatório atual por teclado sem enviar dados", async ({ page }) => 
   })
   await page.goto("/#importar-csv")
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/validacao-previa.csv")
   await page.getByRole("combobox", { name: "SKU", exact: true }).click()
   await page.getByRole("option", { name: "Coluna 1: SKU", exact: true }).click()
@@ -52,7 +52,7 @@ test("explica escopo integral e desabilita relatório sem apontamentos", async (
   page,
 }) => {
   await page.goto("/#importar-csv")
-  await page.getByLabel("Arquivo CSV", { exact: true }).setInputFiles({
+  await page.getByLabel("Arquivo CSV ou XLSX", { exact: true }).setInputFiles({
     name: "parcial.csv",
     mimeType: "text/csv",
     buffer: Buffer.from(

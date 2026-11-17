@@ -12,7 +12,7 @@ test("edita células mapeadas, recalcula validação e restaura valores locais",
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto("/#importar-csv")
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/validacao-previa.csv")
 
   const mapping = page.getByRole("region", {
@@ -39,7 +39,7 @@ test("edita células mapeadas, recalcula validação e restaura valores locais",
 
   await expect(input).toHaveValue("SKU-99")
   const originalTable = page.getByRole("region", {
-    name: "Prévia CSV. Role na horizontal para consultar todas as colunas.",
+    name: "Prévia do arquivo. Role na horizontal para consultar todas as colunas.",
     exact: true,
   })
   await expect(originalTable).toContainText(" SKU-01 ")
@@ -89,7 +89,7 @@ test("compartilha edição quando dois campos usam mesma coluna e restaura todas
 }) => {
   await page.goto("/#importar-csv")
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/validacao-previa.csv")
 
   for (const field of ["SKU", "GTIN"]) {
@@ -116,7 +116,7 @@ test("compartilha edição quando dois campos usam mesma coluna e restaura todas
   await page.getByRole("button", { name: "Concluir edição" }).click()
   await page.getByRole("button", { name: "Limpar arquivo" }).click()
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/validacao-previa.csv")
   await expect(page.locator("#csv-edit-status")).toContainText(
     "0 células alteradas",

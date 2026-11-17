@@ -8,7 +8,7 @@ test("lê tabulação com BOM, aspas, acentos e identificadores como texto", asy
     if (request.method() !== "GET") sentRequests.push(request.url())
   })
   await page.goto("/#importar-csv")
-  await page.getByLabel("Arquivo CSV", { exact: true }).setInputFiles({
+  await page.getByLabel("Arquivo CSV ou XLSX", { exact: true }).setInputFiles({
     name: "tabulado.csv",
     mimeType: "text/csv",
     buffer: Buffer.from(
@@ -34,7 +34,7 @@ test("rejeita codificações incompatíveis e bytes inválidos tardios e recuper
   page,
 }) => {
   await page.goto("/#importar-csv")
-  const file = page.getByLabel("Arquivo CSV", { exact: true })
+  const file = page.getByLabel("Arquivo CSV ou XLSX", { exact: true })
   await file.setInputFiles("tests/fixtures/produtos.csv")
   await expect(page.getByRole("table")).toBeVisible()
   const incompatibleFiles = [

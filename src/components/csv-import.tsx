@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { CsvColumnMapping } from "@/components/csv-column-mapping"
+import { XlsxSheetPicker } from "@/components/xlsx-sheet-picker"
+import { parseXlsxFile } from "@/lib/parsers/xlsx"
+import { getXlsxIssueMessage } from "@/lib/parsers/xlsx-types"
 import { CsvPagination } from "@/components/csv-pagination"
 import { CSV_PAGE_SIZE, getPageWindow } from "@/domain/pagination"
 import {
@@ -34,6 +37,7 @@ import type { CsvParseIssue } from "@/lib/parsers/csv-types"
 import {
   MAX_CSV_COLUMN_COUNT,
   MAX_CSV_RECORDS,
+  MAX_CSV_FILE_BYTES,
   validateCsvFile,
 } from "@/lib/parsers/csv-file"
 
@@ -42,9 +46,9 @@ function getFileIssueMessage(
 ): string {
   switch (issue) {
     case "unsupported-extension":
-      return "Selecione um arquivo com extensão .csv."
+      return "Selecione um arquivo com extensão .csv ou .xlsx."
     case "empty":
-      return "O arquivo está vazio. Escolha um CSV com cabeçalho e dados."
+      return "O arquivo está vazio. Escolha um CSV ou XLSX com cabeçalho e dados."
     case "too-large":
       return "O arquivo passa de 10 MiB. Salve uma cópia menor e tente novamente."
     default:
@@ -119,11 +123,11 @@ function CsvPreviewTable({ preview }: { preview: CsvPreview }) {
       <Table
         aria-describedby="csv-preview-help"
         className="min-w-160 border-collapse text-left text-sm"
-        containerAriaLabel="Prévia CSV. Role na horizontal para consultar todas as colunas."
+        containerAriaLabel="Prévia do arquivo. Role na horizontal para consultar todas as colunas."
         containerClassName="rounded-lg border border-border"
       >
         <TableCaption className="sr-only">
-          Prévia de registros CSV. Valores aparecem como texto.
+          Prévia de registros do arquivo. Valores aparecem como texto.
         </TableCaption>
         <TableHeader className="bg-muted/70 text-xs text-muted-foreground">
           <TableRow>
@@ -173,6 +177,10 @@ function CsvPreviewTable({ preview }: { preview: CsvPreview }) {
 
 export function CsvImport() {
   const [csvDocument, setCsvDocument] = useState<CsvDocument | null>(null)
+  const workbookFile = useRef<File | null>(null)
+  const [sheets, setSheets] = useState<string[]>([])
+  const [selectedSheet, setSelectedSheet] = useState<string | null>(null)
+  const [openedSheet, setOpenedSheet] = useState("")
   const preview = csvDocument
   const activeRead = useRef<AbortController | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
@@ -180,7 +188,7 @@ export function CsvImport() {
   const [errorMessage, setErrorMessage] = useState("")
   const [isReading, setIsReading] = useState(false)
   const [statusMessage, setStatusMessage] = useState(
-    "Selecione um arquivo CSV para consultar uma prévia local.",
+    "Selecione um arquivo CSV ou XLSX para consultar uma prévia local.",
   )
 
   useEffect(
@@ -204,6 +212,62 @@ export function CsvImport() {
     requestAnimationFrame(() => fileInput.current?.focus())
   }
 
+  async function readWorkbook(file: File, sheetIndex?: number) {
+    activeRead.current?.abort()
+    const controller = new AbortController()
+    activeRead.current = controller
+    setCsvDocument(null)
+    setOpenedSheet("")
+    setErrorMessage("")
+    setIsReading(true)
+    setStatusMessage(
+      sheetIndex === undefined
+        ? "Consultando abas do XLSX no navegador."
+        : "Lendo a aba escolhida no navegador.",
+    )
+    try {
+      const outcome = await parseXlsxFile(file, {
+        sheetIndex,
+        signal: controller.signal,
+      })
+      if (activeRead.current !== controller) return
+      if (outcome.kind === "sheets") {
+        setSheets(outcome.sheets)
+        setStatusMessage(
+          "Escolha uma aba e use Abrir aba para consultar seus registros.",
+        )
+      } else if (outcome.kind === "ready") {
+        setCsvDocument(outcome.document)
+        setOpenedSheet(sheets[sheetIndex!] ?? "")
+        setStatusMessage(getCompletionMessage(outcome.document))
+      } else {
+        setErrorMessage(getXlsxIssueMessage(outcome.kind))
+        setStatusMessage("")
+      }
+    } catch {
+      if (activeRead.current !== controller) return
+      setErrorMessage(
+        "A leitura não terminou. A planilha pode ser muito complexa ou inválida. Salve uma cópia menor em XLSX sem senha e tente novamente.",
+      )
+      setStatusMessage("")
+    } finally {
+      if (activeRead.current === controller) {
+        activeRead.current = null
+        setIsReading(false)
+      }
+    }
+  }
+
+  function selectSheet(value: string | null) {
+    setSelectedSheet(value)
+    setCsvDocument(null)
+    setOpenedSheet("")
+    setErrorMessage("")
+    setStatusMessage(
+      "Use Abrir aba para consultar os registros da aba escolhida.",
+    )
+  }
+
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const input = event.currentTarget
     const file = input.files?.[0]
@@ -216,14 +280,31 @@ export function CsvImport() {
     activeRead.current?.abort()
     activeRead.current = null
     setCsvDocument(null)
+    workbookFile.current = null
+    setSheets([])
+    setSelectedSheet(null)
+    setOpenedSheet("")
     setSelectedFileName(file.name)
     setErrorMessage("")
     setStatusMessage("")
 
-    const issue = validateCsvFile(file.name, file.size)
+    const isXlsx = /\.xlsx$/i.test(file.name)
+    const issue = isXlsx
+      ? file.size === 0
+        ? "empty"
+        : file.size > MAX_CSV_FILE_BYTES
+          ? "too-large"
+          : null
+      : validateCsvFile(file.name, file.size)
 
     if (issue) {
       setErrorMessage(getFileIssueMessage(issue))
+      return
+    }
+
+    if (isXlsx) {
+      workbookFile.current = file
+      await readWorkbook(file)
       return
     }
 
@@ -272,11 +353,18 @@ export function CsvImport() {
   }
 
   function clearSelection() {
+    activeRead.current?.abort()
+    activeRead.current = null
+    workbookFile.current = null
+    setSheets([])
+    setSelectedSheet(null)
+    setOpenedSheet("")
+    setIsReading(false)
     setCsvDocument(null)
     setSelectedFileName("")
     setErrorMessage("")
     setStatusMessage(
-      "Selecione um arquivo CSV para consultar uma prévia local.",
+      "Selecione um arquivo CSV ou XLSX para consultar uma prévia local.",
     )
   }
 
@@ -294,7 +382,7 @@ export function CsvImport() {
           className="mt-3 font-serif text-3xl leading-tight font-medium tracking-tight text-foreground sm:text-4xl"
           id="csv-import-title"
         >
-          Consulte seu arquivo CSV antes de preparar a planilha.
+          Consulte seu arquivo CSV ou XLSX antes de preparar a planilha.
         </h2>
         <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">
           O conteúdo é lido no navegador. Você pode relacionar colunas aos
@@ -304,11 +392,12 @@ export function CsvImport() {
         <Card className="mt-8 border-primary/15 shadow-sm">
           <CardHeader className="border-b border-border/70">
             <CardTitle className="font-serif text-xl font-medium tracking-tight">
-              Abrir arquivo CSV
+              Abrir arquivo CSV ou XLSX
             </CardTitle>
             <CardDescription className="leading-6">
-              Escolha um arquivo UTF-8 de até 10 MiB, 20.000 registros e 100
-              colunas. As tabelas mostram até 100 registros por página.
+              Escolha CSV em UTF-8 ou XLSX de até 10 MiB. Cada arquivo CSV ou
+              aba XLSX aceita até 20.000 registros e 100 colunas. As tabelas
+              mostram até 100 registros por página.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid min-w-0 gap-5 pt-5">
@@ -317,10 +406,10 @@ export function CsvImport() {
                 className="text-sm font-medium text-foreground"
                 htmlFor="csv-file"
               >
-                Arquivo CSV
+                Arquivo CSV ou XLSX
               </label>
               <Input
-                accept=".csv,text/csv"
+                accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 aria-describedby="csv-file-help"
                 disabled={isReading}
                 id="csv-file"
@@ -332,8 +421,12 @@ export function CsvImport() {
                 className="text-sm leading-6 text-muted-foreground"
                 id="csv-file-help"
               >
-                CSV em UTF-8, até 10 MiB, 20.000 registros e 100 colunas. O
-                conteúdo não é enviado nem salvo.
+                O conteúdo não é enviado nem salvo. No XLSX, escolha uma aba
+                após abrir o arquivo. Abas com fórmulas, erros ou mesclagens não
+                são aceitas; salve uma cópia só com valores. Códigos mantêm os
+                zeros presentes no texto ou formato da célula; dígitos já
+                perdidos na planilha não podem ser recuperados. Datas usam texto
+                formatado. XLS e XLSM não são aceitos.
               </p>
             </div>
 
@@ -343,7 +436,6 @@ export function CsvImport() {
                   {selectedFileName}
                 </p>
                 <Button
-                  disabled={isReading}
                   onClick={clearSelection}
                   type="button"
                   variant="outline"
@@ -373,16 +465,37 @@ export function CsvImport() {
                 Cancelar leitura
               </Button>
             )}
+            {sheets.length > 0 && (
+              <XlsxSheetPicker
+                sheets={sheets}
+                selectedIndex={selectedSheet}
+                disabled={isReading}
+                onSelect={selectSheet}
+                onOpen={() => {
+                  if (workbookFile.current && selectedSheet !== null)
+                    void readWorkbook(
+                      workbookFile.current,
+                      Number(selectedSheet),
+                    )
+                }}
+              />
+            )}
+            {openedSheet && (
+              <p className="text-sm font-medium break-all">
+                Aba aberta: {openedSheet}
+              </p>
+            )}
             {preview && (
               <p className="text-sm text-muted-foreground">
-                Edição, análise e relatório cobrem todos os registros deste
-                arquivo. Navegue pelas páginas para consultar os dados.
+                Edição, análise e relatório cobrem todos os registros{" "}
+                {openedSheet ? "da aba aberta" : "deste arquivo"}. Navegue pelas
+                páginas para consultar os dados.
               </p>
             )}
 
             {errorMessage && (
               <Alert className="bg-destructive/5" variant="destructive">
-                <AlertTitle>Não foi possível abrir este CSV</AlertTitle>
+                <AlertTitle>Não foi possível abrir este arquivo</AlertTitle>
                 <AlertDescription>{errorMessage}</AlertDescription>
               </Alert>
             )}

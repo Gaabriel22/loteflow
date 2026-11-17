@@ -45,7 +45,7 @@ test("prévia CSV não tem violações WCAG 2.2 A/AA detectáveis por axe", asyn
 }) => {
   await page.goto("/#importar-csv")
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/produtos.csv")
   await expect(page.getByRole("table")).toBeVisible()
 
@@ -68,7 +68,7 @@ test("mapeamento CSV não tem violações WCAG 2.2 A/AA detectáveis por axe", a
 }) => {
   await page.goto("/#importar-csv")
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/mapeamento-colunas.csv")
   await page.getByRole("combobox", { name: "SKU" }).click()
   await page.getByRole("option", { name: "Coluna 1: SKU" }).click()

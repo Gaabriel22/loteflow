@@ -7,7 +7,7 @@ test("combina filtros sem alterar análise ou relatório, e permite limpar", asy
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto("/#importar-csv")
   await page
-    .getByLabel("Arquivo CSV", { exact: true })
+    .getByLabel("Arquivo CSV ou XLSX", { exact: true })
     .setInputFiles("tests/fixtures/validacao-previa.csv")
   for (const [index, field] of [
     "SKU",
@@ -72,7 +72,7 @@ test("mantém filtros durante edição e restauração e reinicia ao remapear ou
   page,
 }) => {
   await page.goto("/#importar-csv")
-  const file = page.getByLabel("Arquivo CSV", { exact: true })
+  const file = page.getByLabel("Arquivo CSV ou XLSX", { exact: true })
   await file.setInputFiles("tests/fixtures/validacao-previa.csv")
   await page.getByRole("combobox", { name: "Preço", exact: true }).click()
   await page

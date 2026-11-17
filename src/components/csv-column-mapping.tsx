@@ -106,7 +106,7 @@ function MappedCsvPreviewTable({
         containerClassName="rounded-lg border border-border"
       >
         <TableCaption className="sr-only">
-          Prévia organizada de valores CSV, exibidos como texto.
+          Prévia organizada de valores do arquivo, exibidos como texto.
         </TableCaption>
         <TableHeader className="bg-muted/70 text-xs text-muted-foreground">
           <TableRow>
