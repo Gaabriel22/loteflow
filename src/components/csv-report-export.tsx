@@ -75,7 +75,9 @@ export function CsvReportExport({
         cabeçalho usam linha 1 e registro vazio; não representam produtos. No
         CSV, a linha é a linha física inicial do registro; no XLSX, é a linha da
         aba aberta. Perfil e versão são capturados com os apontamentos. Avisos
-        do arquivo não têm registro, linha ou coluna específicos.
+        do arquivo não têm registro, linha ou coluna específicos. Após correções
+        em lote, os totais e números de registro se referem à cópia atual; a
+        linha de origem continua sendo a do arquivo original.
       </p>
       <p
         className="text-sm leading-6 text-muted-foreground"

@@ -1,6 +1,12 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
+import { BatchCorrections } from "@/components/batch-corrections"
+import {
+  createWorkingCopy,
+  projectWorkingCopy,
+  type WorkingCopy,
+} from "@/domain/corrections/working-copy"
 import { CsvPagination } from "@/components/csv-pagination"
 import { getPageWindow } from "@/domain/pagination"
 import { CsvValidationResults } from "@/components/csv-validation-results"
@@ -38,7 +44,6 @@ import {
   type CsvColumnMapping as CsvColumnMappingState,
 } from "@/domain/product-mapping/csv-column-mapping"
 import {
-  applyCsvCellEdits,
   countCsvCellEdits,
   updateCsvCellEdit,
   type CsvCellEdits,
@@ -82,12 +87,14 @@ function MappedCsvPreviewTable({
   isEditing,
   onEdit,
   onRestore,
+  rowIndexes,
 }: {
   preview: ReturnType<typeof deriveMappedCsvPreview>
   edits: CsvCellEdits
   isEditing: boolean
   onEdit: (rowIndex: number, columnIndex: number, value: string) => void
   onRestore: (rowIndex: number, columnIndex: number) => void
+  rowIndexes: readonly number[]
 }) {
   const [page, setPage] = useState(0)
   const { offset, end } = getPageWindow(preview.rows.length, page)
@@ -142,7 +149,7 @@ function MappedCsvPreviewTable({
                   const sourceColumn = field?.columnIndex
                   const isCellEdited =
                     sourceColumn !== undefined &&
-                    edits[rowIndex]?.[sourceColumn] !== undefined
+                    edits[rowIndexes[rowIndex]]?.[sourceColumn] !== undefined
                   const inputId = `csv-cell-${rowIndex}-${field?.key}`
 
                   return (
@@ -221,7 +228,12 @@ function MappedCsvPreviewTable({
 
 export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
   const [mapping, setMapping] = useState(createEmptyCsvColumnMapping)
-  const [edits, setEdits] = useState<CsvCellEdits>({})
+  const [copy, setCopy] = useState(createWorkingCopy)
+  const [undoCopy, setUndoCopy] = useState<WorkingCopy | null>(null)
+  const [revision, setRevision] = useState(0)
+  const [batchRevision, setBatchRevision] = useState(0)
+  const [copyMessage, setCopyMessage] = useState("")
+  const copyStatus = useRef<HTMLParagraphElement>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [profileId, setProfileId] = useState<ValidationProfileId>("generic")
   const [requiredFields, setRequiredFields] = useState<ProductField[]>(() => [
@@ -231,17 +243,27 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
     () => findDuplicateHeaders(preview.headers),
     [preview.headers],
   )
-  const editCount = countCsvCellEdits(edits)
+  const editCount = countCsvCellEdits(copy.edits)
+  const workingPreview = useMemo(
+    () => projectWorkingCopy(preview, copy),
+    [preview, copy],
+  )
+  const sessionKey = JSON.stringify([
+    revision,
+    mapping,
+    profileId,
+    requiredFields,
+  ])
   const mappedPreview = useMemo(
     () =>
       deriveMappedCsvPreview(
         {
           ...preview,
-          rows: applyCsvCellEdits(preview.rows, edits, preview.columnCount),
+          ...workingPreview,
         },
         mapping,
       ),
-    [preview, mapping, edits],
+    [preview, mapping, workingPreview],
   )
 
   function handleMappingChange(
@@ -256,21 +278,64 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
     columnIndex: number,
     value: string,
   ) {
-    setEdits((currentEdits) =>
-      updateCsvCellEdit(
-        currentEdits,
+    const sourceRowIndex = workingPreview.rowIndexes[rowIndex]
+    setCopy((currentCopy) => ({
+      ...currentCopy,
+      edits: updateCsvCellEdit(
+        currentCopy.edits,
         preview.rows,
         preview.columnCount,
-        rowIndex,
+        sourceRowIndex,
         columnIndex,
         value,
       ),
+    }))
+    setUndoCopy(null)
+    setRevision((current) => current + 1)
+    setCopyMessage(
+      undoCopy
+        ? "Edição manual atualizada. Desfazer o último lote deixou de estar disponível."
+        : "Edição manual atualizada.",
     )
   }
 
   function handleCellRestore(rowIndex: number, columnIndex: number) {
-    const originalValue = preview.rows[rowIndex]?.[columnIndex] ?? ""
+    const originalValue =
+      preview.rows[workingPreview.rowIndexes[rowIndex]]?.[columnIndex] ?? ""
     handleCellEdit(rowIndex, columnIndex, originalValue)
+  }
+
+  function replaceCopy(next: WorkingCopy, message: string) {
+    setCopy(next)
+    setRevision((current) => current + 1)
+    setCopyMessage(message)
+    requestAnimationFrame(() => copyStatus.current?.focus())
+  }
+
+  function applyBatch(next: WorkingCopy) {
+    setUndoCopy(copy)
+    setBatchRevision((current) => current + 1)
+    replaceCopy(next, "Correções aplicadas à cópia de trabalho.")
+  }
+
+  function undoBatch() {
+    if (!undoCopy) return
+    setBatchRevision((current) => current + 1)
+    replaceCopy(
+      undoCopy,
+      "Último lote desfeito. Edições anteriores ao lote foram preservadas.",
+    )
+    setUndoCopy(null)
+  }
+
+  function restoreAll() {
+    if (copy.removedRows.length > 0 || undoCopy !== null)
+      setBatchRevision((current) => current + 1)
+    replaceCopy(
+      createWorkingCopy(),
+      "Todas as alterações foram restauradas, inclusive registros removidos.",
+    )
+    setUndoCopy(null)
   }
 
   return (
@@ -363,17 +428,44 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
       </p>
 
       <p
+        ref={copyStatus}
+        tabIndex={-1}
         className="mt-4 text-sm text-muted-foreground"
         id="csv-edit-status"
         role="status"
         aria-live="polite"
       >
-        {editCount} {editCount === 1 ? "célula alterada" : "células alteradas"}.
+        {editCount} {editCount === 1 ? "célula alterada" : "células alteradas"}.{" "}
+        {workingPreview.rows.length} registros na cópia de trabalho.{" "}
+        {copy.removedRows.length}{" "}
+        {copy.removedRows.length === 1
+          ? "registro removido"
+          : "registros removidos"}
+        . {copyMessage}
       </p>
-      {editCount > 0 && (
-        <Button onClick={() => setEdits({})} type="button" variant="outline">
+      {undoCopy && (
+        <Button onClick={undoBatch} type="button" variant="outline">
+          Desfazer último lote
+        </Button>
+      )}
+      {(editCount > 0 || copy.removedRows.length > 0) && (
+        <Button
+          className="h-auto min-h-11 max-w-full whitespace-normal"
+          onClick={restoreAll}
+          type="button"
+          variant="outline"
+        >
           Restaurar todas as alterações
         </Button>
+      )}
+      {preview.rows.length > 0 && (
+        <BatchCorrections
+          key={sessionKey}
+          document={preview}
+          copy={copy}
+          mapping={mapping}
+          onApply={applyBatch}
+        />
       )}
       {mappedPreview.fields.length > 0 ? (
         <>
@@ -396,7 +488,9 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
             </p>
           )}
           <MappedCsvPreviewTable
-            edits={edits}
+            key={copy.removedRows.length}
+            edits={copy.edits}
+            rowIndexes={workingPreview.rowIndexes}
             isEditing={isEditing}
             onEdit={handleCellEdit}
             onRestore={handleCellRestore}
@@ -413,6 +507,7 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
         profileId === "bling-simple") && (
         <CsvValidationResults
           key={
+            batchRevision +
             profileId +
             mappedPreview.fields
               .map(({ key, columnIndex }) => `${key}:${columnIndex}`)
@@ -422,7 +517,7 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
           profileId={profileId}
           requiredFields={requiredFields}
           headerFindings={headerFindings}
-          totalRecordCount={preview.totalRecordCount}
+          totalRecordCount={workingPreview.rows.length}
         />
       )}
     </section>

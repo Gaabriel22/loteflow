@@ -23,7 +23,7 @@ A aplicação MUST iniciar em modo de leitura e MUST exigir ação explícita an
 - **THEN** o conteúdo permanece texto e não é executado
 
 ### Requirement: Preservar original e associar alterações à célula CSV
-A aplicação MUST manter a prévia CSV original intacta e aplicar alterações somente à cópia de trabalho em memória. Cada alteração MUST permanecer associada ao índice do registro e da coluna de origem, independente do campo que usa essa coluna. Colunas não mapeadas MUST permanecer inalteradas. Quando uma coluna de origem alimentar mais de um campo, suas projeções MUST refletir o mesmo valor editado.
+A aplicação MUST manter a prévia CSV original intacta e aplicar alterações somente à cópia de trabalho em memória. Cada alteração MUST permanecer associada ao índice do registro e da coluna de origem, independente do campo que usa essa coluna ou da remoção reversível de outros registros. Colunas não mapeadas MUST permanecer inalteradas, exceto quando explicitamente selecionadas e confirmadas para aparo em lote. Quando uma coluna de origem alimentar mais de um campo, suas projeções MUST refletir o mesmo valor editado.
 
 #### Scenario: Manter prévia original
 - **WHEN** uma pessoa altera célula da cópia de trabalho
@@ -40,6 +40,10 @@ A aplicação MUST manter a prévia CSV original intacta e aplicar alterações 
 #### Scenario: Limitar edição à prévia
 - **WHEN** o arquivo possui mais registros que o limite de prévia
 - **THEN** a pessoa pode navegar e editar registros de qualquer página do documento, preservando o índice global e as alterações ao retornar
+
+#### Scenario: Preservar identidade após remoção em lote
+- **WHEN** um registro anterior foi removido por correção confirmada
+- **THEN** editar ou restaurar o registro sobrevivente continua usando a célula original correta
 
 ### Requirement: Restaurar alterações sem perder o original
 A aplicação MUST permitir restaurar o valor original de uma célula alterada e restaurar todas as alterações da cópia de trabalho. MUST indicar a quantidade de células editadas na sessão do arquivo. Trocar ou limpar o arquivo MUST descartar alterações e mapeamentos da seleção anterior.
@@ -74,4 +78,3 @@ Alterações MUST existir apenas na memória da página e MUST NOT ser enviadas 
 #### Scenario: Exportar relatório após edição
 - **WHEN** a pessoa solicita explicitamente o relatório dos apontamentos da prévia
 - **THEN** somente o download local recebe os valores atuais dos campos mapeados e a cópia em memória permanece intacta
-

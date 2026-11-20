@@ -14,6 +14,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Traces contêm dependências empacotadas que não pertencem ao código-fonte.
+    "test-results/**",
+    "playwright-report/**",
+    ".playwright-mcp/**",
   ]),
 ])
 

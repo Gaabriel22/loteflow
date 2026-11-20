@@ -64,6 +64,18 @@ Na lista de apontamentos, filtre por campo e severidade ou busque trechos de reg
 
 Baixe os apontamentos em CSV pelo botão na validação. O relatório cobre todos os registros analisados, inclui os valores mapeados no momento da solicitação e informa o total do arquivo. Avisos de cabeçalho permitem download mesmo antes do mapeamento e em arquivo sem registros de dados. A geração ocorre em Worker, permite cancelar e encerra ao trocar arquivo ou mapeamento. Sem apontamentos, o botão fica desabilitado. A saída é `loteflow-apontamentos.csv`.
 
+## Correções locais em lote
+
+Em **Corrigir em lote**, escolha colunas para aparar espaços nas extremidades, colunas exclusivas de preço/estoque para normalizar decimais e, se necessário, **Remover registros totalmente vazios em todas as colunas**. Nada vem selecionado. Colunas não mapeadas podem receber aparo somente quando escolhidas; colunas numéricas compartilhadas com SKU, GTIN ou descrição não permitem normalização decimal.
+
+Use **Gerar prévia de correções** para revisar antes/depois, quantidade de células e registros removidos. O planejamento ocorre em Worker, pode ser cancelado e cobre todos os registros da cópia atual, independentemente de página/filtros. A prévia mostra até 100 mudanças por página; aspas e escapes tornam espaços e quebras de linha identificáveis. Só **Aplicar correções da prévia** muda a cópia. Descartar, editar ou mudar seleção, mapeamento, obrigatoriedade, perfil, arquivo ou aba invalida a prévia pendente.
+
+A normalização troca apenas ponto/vírgula de números simples, sem arredondamento ou perda de zeros. Ignora valores com exatamente três casas, como `1,234`, por ambiguidade com milhar; também ignora múltiplos separadores, moeda, expoentes e fórmulas. Espaços externos só saem com aparo selecionado. Não deduplica códigos nem promete compatibilidade com ERP.
+
+Remover vazios verifica todas as colunas atuais, incluindo não mapeadas e excedentes em linhas irregulares. Os sobreviventes mantêm ordem, edições e linha física/de aba de origem. Os números de registro e totais do relatório passam a descrever a cópia atual. A prévia original continua intacta.
+
+**Desfazer último lote** recupera o snapshot anterior ao lote, incluindo edições manuais anteriores. Nova edição manual ou outro lote substitui essa possibilidade; **Restaurar todas as alterações** sempre recupera valores e registros originais. Aplicar/desfazer lote reinicia filtros/páginas dos resultados e cancela relatório anterior em geração. Edição individual mantém filtros. Tudo fica em memória; a exportação do arquivo de produtos corrigido pertence à próxima etapa.
+
 ## Validações genéricas e localização
 
 Em **Campos obrigatórios**, use os checkboxes para exigir preenchimento dos campos mapeados. Descrição, Preço e Estoque são obrigatórios por padrão; SKU e GTIN, opcionais. Campos opcionais vazios não recebem erro de formato, mas valores preenchidos continuam sendo validados. Se todos os campos mapeados estiverem vazios, a linha gera somente um Aviso. A seleção permanece ao editar, restaurar, paginar ou remapear; trocar arquivo/aba restaura o padrão. Isso não altera células nem define regras de ERP.
