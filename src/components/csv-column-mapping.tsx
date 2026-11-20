@@ -5,6 +5,8 @@ import { CsvPagination } from "@/components/csv-pagination"
 import { getPageWindow } from "@/domain/pagination"
 import { CsvValidationResults } from "@/components/csv-validation-results"
 import { RequiredFields } from "@/components/required-fields"
+import { ValidationProfilePicker } from "@/components/validation-profile-picker"
+import type { ValidationProfileId } from "@/domain/profiles/catalog"
 import { findDuplicateHeaders } from "@/domain/product-validation/headers"
 import { DEFAULT_REQUIRED_FIELDS } from "@/domain/product-validation/types"
 import type { ProductField } from "@/domain/product-fields"
@@ -221,6 +223,7 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
   const [mapping, setMapping] = useState(createEmptyCsvColumnMapping)
   const [edits, setEdits] = useState<CsvCellEdits>({})
   const [isEditing, setIsEditing] = useState(false)
+  const [profileId, setProfileId] = useState<ValidationProfileId>("generic")
   const [requiredFields, setRequiredFields] = useState<ProductField[]>(() => [
     ...DEFAULT_REQUIRED_FIELDS,
   ])
@@ -299,6 +302,7 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
         mapeados.
       </p>
 
+      <ValidationProfilePicker value={profileId} onChange={setProfileId} />
       <FieldGroup className="mt-4 grid min-w-0 gap-4 sm:grid-cols-2">
         {PRODUCT_CSV_FIELDS.map((field) => {
           const selectId = `csv-column-${field.key}`
@@ -404,12 +408,18 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
           Escolha ao menos uma coluna para ver a prévia organizada.
         </p>
       )}
-      {(mappedPreview.fields.length > 0 || headerFindings.length > 0) && (
+      {(mappedPreview.fields.length > 0 ||
+        headerFindings.length > 0 ||
+        profileId === "bling-simple") && (
         <CsvValidationResults
-          key={mappedPreview.fields
-            .map(({ key, columnIndex }) => `${key}:${columnIndex}`)
-            .join(",")}
+          key={
+            profileId +
+            mappedPreview.fields
+              .map(({ key, columnIndex }) => `${key}:${columnIndex}`)
+              .join(",")
+          }
           mappedPreview={mappedPreview}
+          profileId={profileId}
           requiredFields={requiredFields}
           headerFindings={headerFindings}
           totalRecordCount={preview.totalRecordCount}

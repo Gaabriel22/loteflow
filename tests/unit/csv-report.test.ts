@@ -36,6 +36,8 @@ describe("CSV findings report", () => {
       "Erro",
       "",
       "",
+      "Genérico",
+      "1",
       "00001",
       'inválido;\n"texto"',
     ])

@@ -17,11 +17,13 @@ export function CsvFindingsFilters({
   filter,
   onChange,
   hasHeaderFindings = false,
+  hasDocumentFindings = false,
 }: {
   fields: readonly { label: string }[]
   filter: FindingsFilter
   onChange: (filter: FindingsFilter) => void
   hasHeaderFindings?: boolean
+  hasDocumentFindings?: boolean
 }) {
   return (
     <div className="grid min-w-0 gap-3">
@@ -52,6 +54,9 @@ export function CsvFindingsFilters({
               <SelectGroup>
                 <SelectItem value="__all__">Todos os campos</SelectItem>
                 <SelectItem value="Linha">Linha</SelectItem>
+                {hasDocumentFindings && (
+                  <SelectItem value="Arquivo">Arquivo</SelectItem>
+                )}
                 {hasHeaderFindings && (
                   <SelectItem value="Cabeçalho">Cabeçalho</SelectItem>
                 )}

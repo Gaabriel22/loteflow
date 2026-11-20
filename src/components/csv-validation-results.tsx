@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { CsvReportExport } from "@/components/csv-report-export"
 import { CsvFindingsFilters } from "@/components/csv-findings-filters"
 import { HeaderFindingsTable } from "@/components/header-findings-table"
+import { DocumentFindings } from "@/components/document-findings"
+import { validateWithProfile } from "@/domain/profiles/validate"
+import type { ValidationProfileId } from "@/domain/profiles/catalog"
 import {
   SEVERITY_LABELS,
   type HeaderFinding,
@@ -27,10 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { ProductField } from "@/domain/product-fields"
-import {
-  validateProducts,
-  type ProductValidation,
-} from "@/domain/product-validation"
+import { type ProductValidation } from "@/domain/product-validation"
 import type { ProductValues } from "@/domain/product-fields"
 import type { MappedCsvPreview } from "@/domain/product-mapping/csv-column-mapping"
 
@@ -173,17 +173,21 @@ export function CsvValidationResults({
   totalRecordCount,
   requiredFields,
   headerFindings,
+  profileId,
 }: {
   mappedPreview: MappedCsvPreview
   totalRecordCount: number
   requiredFields: readonly ProductField[]
   headerFindings: HeaderFinding[]
+  profileId: ValidationProfileId
 }) {
   const [filter, setFilter] = useState<FindingsFilter>({ field: "", query: "" })
   const deferredFilter = useDeferredValue(filter)
   const validation = useMemo(
     () =>
-      validateProducts(mappedPreview.products, {
+      validateWithProfile(mappedPreview.products, {
+        profileId,
+        totalRecordCount,
         mappedFields: mappedPreview.fields.map(({ key }) => key),
         requiredFields,
         headerFindings,
@@ -195,7 +199,13 @@ export function CsvValidationResults({
           ]),
         ),
       }),
-    [mappedPreview, requiredFields, headerFindings],
+    [
+      mappedPreview,
+      requiredFields,
+      headerFindings,
+      profileId,
+      totalRecordCount,
+    ],
   )
   const visibleValidation = useMemo(
     () => filterFindings(validation, deferredFilter),
@@ -212,7 +222,9 @@ export function CsvValidationResults({
           className="text-base font-semibold text-foreground"
           id="csv-validation-title"
         >
-          Validação genérica do arquivo
+          {profileId === "generic"
+            ? "Validação genérica do arquivo"
+            : "Validação Bling experimental"}
         </h3>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           Regras de produto se aplicam somente aos campos mapeados. Avisos de
@@ -258,6 +270,7 @@ export function CsvValidationResults({
         fields={mappedPreview.fields}
         filter={filter}
         hasHeaderFindings={headerFindings.length > 0}
+        hasDocumentFindings={validation.documentFindings.length > 0}
         onChange={setFilter}
       />
       <p
@@ -273,13 +286,15 @@ export function CsvValidationResults({
       </p>
 
       <HeaderFindingsTable findings={visibleValidation.headerFindings} />
+      <DocumentFindings findings={visibleValidation.documentFindings} />
       {visibleValidation.records.length > 0 ? (
         <ValidationFindingsTable
           key={`${deferredFilter.field}:${deferredFilter.query}:${deferredFilter.severity ?? ""}`}
           fields={mappedPreview.fields}
           validation={visibleValidation}
         />
-      ) : visibleValidation.headerFindings.length === 0 ? (
+      ) : visibleValidation.headerFindings.length === 0 &&
+        visibleValidation.documentFindings.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           {validation.findingCount === 0
             ? "Nenhum apontamento nos registros analisados."

@@ -1,0 +1,12 @@
+{
+  "sourceCheckedAt": "2026-11-20",
+  "profileVersion": "2026-11-20.1",
+  "skuCases": [
+    { "length": 60, "expectedWarnings": 0 },
+    { "length": 61, "expectedWarnings": 1 }
+  ],
+  "documentCases": [
+    { "records": 1000, "expectedWarnings": 0 },
+    { "records": 1001, "expectedWarnings": 1 }
+  ]
+}

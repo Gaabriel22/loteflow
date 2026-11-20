@@ -58,5 +58,12 @@ export function filterFindings(
   return summarizeValidation(records, {
     recordCount: validation.recordCount,
     headerFindings,
+    profile: validation.profile,
+    documentFindings: validation.documentFindings.filter(
+      (finding) =>
+        (field === "" || field === "Arquivo") &&
+        (severity === "" || finding.severity === severity) &&
+        (search === "" || normalizeSearch(finding.message).includes(search)),
+    ),
   })
 }

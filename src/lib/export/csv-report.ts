@@ -4,6 +4,7 @@ import type { ProductValidation } from "@/domain/product-validation"
 import type { ProductValues } from "@/domain/product-fields"
 import { SEVERITY_LABELS } from "../../domain/product-validation/types"
 import { getSourceColumnLabel } from "../../domain/source-location"
+import { VALIDATION_PROFILES } from "../../domain/profiles/catalog"
 
 export type CsvReportInput = {
   validation: ProductValidation<ProductValues>
@@ -16,6 +17,7 @@ export function createCsvReport({
   fields,
   totalRecordCount,
 }: CsvReportInput): string {
+  const profile = validation.profile ?? VALIDATION_PROFILES.generic
   const headers = [
     "Registro do arquivo",
     "Campo",
@@ -25,6 +27,8 @@ export function createCsvReport({
     "Severidade",
     "Linha de origem",
     "Coluna de origem",
+    "Perfil de validação",
+    "Versão do perfil",
     ...fields.map(({ label }) => `Valor: ${label}`),
   ]
   const rows = validation.records.flatMap(
@@ -38,6 +42,8 @@ export function createCsvReport({
         SEVERITY_LABELS[severity],
         sourceLine === null ? "" : String(sourceLine),
         getSourceColumnLabel(columnIndex),
+        profile.label,
+        profile.version,
         ...fields.map(({ key }) => product[key]),
       ]),
   )
@@ -50,10 +56,25 @@ export function createCsvReport({
     SEVERITY_LABELS[finding.severity],
     "1",
     getSourceColumnLabel(finding.columnIndex),
+    profile.label,
+    profile.version,
     ...fields.map(() => ""),
   ])
 
-  return `\uFEFF${unparse([headers, ...headerRows, ...rows], {
+  const documentRows = validation.documentFindings.map((finding) => [
+    "",
+    finding.field,
+    finding.message,
+    String(validation.recordCount),
+    String(totalRecordCount),
+    SEVERITY_LABELS[finding.severity],
+    "",
+    "",
+    profile.label,
+    profile.version,
+    ...fields.map(() => ""),
+  ])
+  return `\uFEFF${unparse([headers, ...documentRows, ...headerRows, ...rows], {
     delimiter: ";",
     newline: "\r\n",
     // Espaços e controles antes de uma fórmula também podem ser ignorados por planilhas.

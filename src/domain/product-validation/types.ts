@@ -1,4 +1,5 @@
 import type { ProductField, ProductValues } from "../product-fields"
+import type { ValidationProfile } from "../profiles/catalog"
 
 export type FindingSeverity = "error" | "warning"
 export type FindingCode =
@@ -8,6 +9,8 @@ export type FindingCode =
   | "invalid-number"
   | "empty-row"
   | "duplicate-header"
+  | "bling-sku-length"
+  | "bling-record-limit"
 export type ProductFinding = {
   field: string
   message: string
@@ -32,6 +35,8 @@ export type ProductValidation<T extends ProductValues> = {
   errorCount: number
   warningCount: number
   headerFindings: HeaderFinding[]
+  documentFindings: ProductFinding[]
+  profile?: ValidationProfile
   records: ProductRecordValidation<T>[]
 }
 export type ValidationOptions = {

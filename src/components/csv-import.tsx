@@ -386,7 +386,8 @@ export function CsvImport() {
         </h2>
         <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">
           O conteúdo é lido no navegador. Você pode relacionar colunas aos
-          campos genéricos de produto; esta etapa não valida regras de ERP.
+          campos genéricos de produto e escolher um perfil de revisão. O perfil
+          Bling é experimental e parcial.
         </p>
 
         <Card className="mt-8 border-primary/15 shadow-sm">

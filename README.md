@@ -74,6 +74,16 @@ SKU duplicado, GTIN com dígito verificador inválido, números inválidos e cam
 
 Cada apontamento mostra registro global, linha de origem e coluna numérica/letra quando aplicável. CSV usa a linha física inicial, incluindo cabeçalhos e células entre aspas com quebras de linha; CRLF conta uma vez. XLSX usa a linha da aba aberta. Registro 1 costuma estar na linha 2, mas pode começar depois em CSV multilinha. Linha inteira não inventa coluna; localização desconhecida fica vazia no relatório. O relatório acrescenta **Severidade**, **Linha de origem** e **Coluna de origem** antes dos valores mapeados. Avisos de cabeçalho usam linha 1 e registro vazio.
 
+## Perfis de validação
+
+**Genérico**, versão `1`, é o padrão. **Bling experimental**, versão `2026-11-20.1`, mantém a base genérica e acrescenta dois avisos preparatórios para produtos simples: SKU mapeado acima de 60 caracteres e documento acima de 1.000 registros. Esses limites foram conferidos em 20/11/2026 no [guia oficial de produtos simples por planilha](https://ajuda.bling.com.br/hc/pt-br/articles/360062630653-Cadastrar-produtos-simples-por-planilha). Reconfira a fonte antes de atualizar o perfil.
+
+A revisão é parcial: não verifica layout oficial, variações, campos fiscais nem todos os requisitos de cadastro/atualização. Não há parceria ou certificação. Ausência de apontamentos não garante aceitação. A configuração de campos obrigatórios continua sendo uma escolha genérica local, sem representar exigência do Bling. Nenhum código é truncado, nenhum arquivo é dividido e o limite local permanece 20.000 registros.
+
+A contagem orientativa de SKU usa pontos de código Unicode e o valor original, incluindo espaços externos, sem normalizar ou remover conteúdo. SKU composto apenas de espaços mantém o aviso genérico de linha vazia. O guia não detalha segmentação Unicode; caracteres compostos devem ser conferidos no destino. O aviso de tamanho considera todos os registros aceitos, inclusive linhas vazias, para orientar revisão antes de preparar lotes.
+
+Alternar perfil preserva dados, mapeamento, edições e obrigatoriedade, reinicia os filtros/página de resultados e cancela relatório anterior em geração. Novo arquivo/aba retorna ao Genérico. O relatório integral inclui **Perfil de validação** e **Versão do perfil**, capturados junto com os apontamentos; avisos de Arquivo têm registro, linha e coluna vazios. Nenhuma consulta ao Bling ocorre durante a revisão; o link para o guia abre somente quando acionado.
+
 O download usa UTF-8 com BOM e ponto e vírgula. Células potencialmente interpretáveis como fórmulas recebem apóstrofo apenas no relatório; a política aparece antes do botão. Programas de planilha podem inferir tipos ao abrir CSV, inclusive remover zeros à esquerda. O relatório não substitui o arquivo de produtos corrigido. Nenhum conteúdo é enviado ou persistido pela aplicação.
 
 Os componentes locais foram gerados com shadcn CLI; o código está versionado em `src/components/ui/`. Pagination usa a composição oficial com botões nativos para mudar dados locais. O CLI não fica como dependência instalada, pois não é necessário para executar a aplicação.
@@ -98,6 +108,6 @@ Metadados, Open Graph, robots e sitemap descrevem apenas a página pública atua
 
 ## Limites desta fundação
 
-O mapeamento e a edição manual são temporários no navegador. A validação genérica e o relatório cobrem todo o CSV ou a aba XLSX aberta. Não há detecção automática, regras de ERP, perfil Bling, exportação completa de produtos ou promessa de compatibilidade. A auditoria axe não comprova conformidade WCAG 2.2 AA; ela complementa testes por teclado e revisão manual.
+O mapeamento e a edição manual são temporários no navegador. A revisão e o relatório cobrem todo o CSV ou a aba XLSX aberta. O perfil Bling é experimental e parcial. Não há detecção automática, validação completa de ERP, exportação completa de produtos ou promessa de compatibilidade. A auditoria axe não comprova conformidade WCAG 2.2 AA; ela complementa testes por teclado e revisão manual.
 
 A hospedagem prevista é Cloudflare. A etapa de publicação verificará build, headers/CSP, módulos Worker e domínio no ambiente real, conforme o [roadmap](docs/ROADMAP.md#hospedagem-na-cloudflare).
