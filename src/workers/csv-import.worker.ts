@@ -2,6 +2,7 @@ import { parse } from "papaparse"
 import { validateCsvEncoding } from "../lib/parsers/csv-encoding"
 import { resolveCsvLimits, validateCsvFile } from "../lib/parsers/csv-file"
 import { createCsvRecordCollector } from "../lib/parsers/csv-records"
+import { createCsvSourceLineTracker } from "../lib/parsers/csv-source-lines"
 import type {
   CsvWorkerMessage,
   CsvWorkerRequest,
@@ -34,14 +35,20 @@ self.onmessage = async (event: MessageEvent<CsvWorkerRequest>) => {
     const text = await file.text()
     const collector = createCsvRecordCollector(limits)
     // Uma quebra final encerra o último registro; não deve criar uma linha artificial.
-    const csv = text.replace(/(?:\r\n|\n|\r)$/, "")
+    const csv = text.replace(/^\uFEFF/, "").replace(/(?:\r\n|\n|\r)$/, "")
+    const takeRecordLine = createCsvSourceLineTracker(csv)
     parse<string[]>(csv, {
       header: false,
       dynamicTyping: false,
       skipEmptyLines: false,
       delimitersToGuess: [",", ";", "\t"],
-      step: ({ data, errors }, parser) => {
-        if (!collector.addRecord(data, errors.length > 0)) {
+      step: ({ data, errors, meta }, parser) => {
+        if (
+          !collector.addRecord(data, {
+            hasParsingErrors: errors.length > 0,
+            sourceLine: takeRecordLine(meta.cursor),
+          })
+        ) {
           parser.abort()
           return
         }

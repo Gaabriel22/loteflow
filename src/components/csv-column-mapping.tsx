@@ -4,6 +4,10 @@ import { useMemo, useState } from "react"
 import { CsvPagination } from "@/components/csv-pagination"
 import { getPageWindow } from "@/domain/pagination"
 import { CsvValidationResults } from "@/components/csv-validation-results"
+import { RequiredFields } from "@/components/required-fields"
+import { findDuplicateHeaders } from "@/domain/product-validation/headers"
+import { DEFAULT_REQUIRED_FIELDS } from "@/domain/product-validation/types"
+import type { ProductField } from "@/domain/product-fields"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
@@ -217,6 +221,13 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
   const [mapping, setMapping] = useState(createEmptyCsvColumnMapping)
   const [edits, setEdits] = useState<CsvCellEdits>({})
   const [isEditing, setIsEditing] = useState(false)
+  const [requiredFields, setRequiredFields] = useState<ProductField[]>(() => [
+    ...DEFAULT_REQUIRED_FIELDS,
+  ])
+  const headerFindings = useMemo(
+    () => findDuplicateHeaders(preview.headers),
+    [preview.headers],
+  )
   const editCount = countCsvCellEdits(edits)
   const mappedPreview = useMemo(
     () =>
@@ -336,6 +347,12 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
         })}
       </FieldGroup>
 
+      <RequiredFields
+        fields={mappedPreview.fields}
+        requiredFields={requiredFields}
+        onChange={setRequiredFields}
+      />
+
       <p className="sr-only" id="csv-column-mapping-help">
         Cada opção inclui a posição da coluna para distinguir cabeçalhos iguais.
         Você pode usar uma coluna em mais de um campo.
@@ -381,18 +398,22 @@ export function CsvColumnMapping({ preview }: { preview: CsvPreview }) {
             onRestore={handleCellRestore}
             preview={mappedPreview}
           />
-          <CsvValidationResults
-            key={mappedPreview.fields
-              .map(({ key, columnIndex }) => `${key}:${columnIndex}`)
-              .join(",")}
-            mappedPreview={mappedPreview}
-            totalRecordCount={preview.totalRecordCount}
-          />
         </>
       ) : (
         <p className="mt-5 text-sm text-muted-foreground">
           Escolha ao menos uma coluna para ver a prévia organizada.
         </p>
+      )}
+      {(mappedPreview.fields.length > 0 || headerFindings.length > 0) && (
+        <CsvValidationResults
+          key={mappedPreview.fields
+            .map(({ key, columnIndex }) => `${key}:${columnIndex}`)
+            .join(",")}
+          mappedPreview={mappedPreview}
+          requiredFields={requiredFields}
+          headerFindings={headerFindings}
+          totalRecordCount={preview.totalRecordCount}
+        />
       )}
     </section>
   )

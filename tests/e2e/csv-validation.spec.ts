@@ -36,7 +36,7 @@ test("valida campos mapeados e preserva dados locais", async ({ page }) => {
     name: "Validação genérica do arquivo",
   })
   await expect(results.getByRole("status")).toHaveText(
-    "Registros analisados: 4. Registros para revisar: 3. Apontamentos: 7.",
+    "Registros analisados: 4. Registros para revisar: 3. Apontamentos: 7. Erros: 6. Avisos: 1.",
   )
   await expect(results).toContainText("Este SKU aparece mais de uma vez.")
   await expect(results).toContainText("Confira os dígitos verificadores")
@@ -46,7 +46,7 @@ test("valida campos mapeados e preserva dados locais", async ({ page }) => {
 
   await selectColumn(page, "Preço", "Não mapeado")
   await expect(results.getByRole("status")).toHaveText(
-    "Registros analisados: 4. Registros para revisar: 3. Apontamentos: 6.",
+    "Registros analisados: 4. Registros para revisar: 3. Apontamentos: 6. Erros: 5. Avisos: 1.",
   )
   await expect(results).not.toContainText("Informe um preço numérico.")
 
@@ -82,7 +82,7 @@ test("analisa todo o arquivo, opera por teclado e cabe em viewports estreitos", 
     name: "Validação genérica do arquivo",
   })
   await expect(results.getByRole("status")).toHaveText(
-    "Registros analisados: 105. Registros para revisar: 2. Apontamentos: 2.",
+    "Registros analisados: 105. Registros para revisar: 2. Apontamentos: 2. Erros: 2. Avisos: 0.",
   )
   await expect(results).toContainText(
     "A análise cobre 105 registros do arquivo. Todos os registros do arquivo estão incluídos na análise.",

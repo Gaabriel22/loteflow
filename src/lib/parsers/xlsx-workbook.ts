@@ -51,6 +51,7 @@ function extractDocument(sheet: WorkSheet): XlsxOutcome {
       totalRecordCount,
       columnCount,
       malformedRecordCount: 0,
+      sourceLines: rows.map((_, index) => index + 2),
     },
   }
 }

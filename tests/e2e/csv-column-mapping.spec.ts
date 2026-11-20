@@ -20,7 +20,12 @@ test("mapeia colunas repetidas e preserva os valores originais", async ({
   await expect(page.locator("#csv-column-mapping-status")).toHaveText(
     "0 de 5 campos mapeados.",
   )
-  await expect(mapping.getByRole("table")).toHaveCount(0)
+  await expect(
+    mapping.getByRole("table", { name: "Prévia organizada" }),
+  ).toHaveCount(0)
+  await expect(
+    mapping.getByRole("table", { name: "Cabeçalhos para revisar" }),
+  ).toBeVisible()
 
   await mapping.getByRole("combobox", { name: "SKU" }).click()
   await page.getByRole("option", { name: "Coluna 1: SKU" }).click()
@@ -43,7 +48,7 @@ test("mapeia colunas repetidas e preserva os valores originais", async ({
   await expect(mappedTable).toContainText("000123")
   await expect(mappedTable).toContainText("Produto correto")
   await expect(mappedTable).toContainText("=1+1")
-  await expect(page.getByRole("table")).toHaveCount(3)
+  await expect(page.getByRole("table")).toHaveCount(4)
   const selectionRequests = requests.slice(requestCountBeforeSelection)
   expect(selectionRequests.some((request) => request.method === "POST")).toBe(
     false,

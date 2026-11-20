@@ -71,7 +71,10 @@ export function CsvReportExport({
         {formatCount.format(totalRecordCount)} registros do arquivo, em todas as
         páginas e independentemente dos filtros. Inclui os valores dos campos
         mapeados no momento da solicitação; não é o arquivo de produtos
-        corrigido.
+        corrigido. Inclui severidade, linha e coluna de origem. Avisos de
+        cabeçalho usam linha 1 e registro vazio; não representam produtos. No
+        CSV, a linha é a linha física inicial do registro; no XLSX, é a linha da
+        aba aberta.
       </p>
       <p
         className="text-sm leading-6 text-muted-foreground"

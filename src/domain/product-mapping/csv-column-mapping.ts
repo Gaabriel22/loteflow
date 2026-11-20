@@ -15,6 +15,7 @@ export type CsvPreviewRows = {
   headers: readonly string[]
   rows: readonly (readonly string[])[]
   columnCount: number
+  sourceLines?: readonly number[]
 }
 
 export type MappedCsvPreview = {
@@ -25,6 +26,7 @@ export type MappedCsvPreview = {
   }>
   rows: string[][]
   products: ProductValues[]
+  sourceLines?: readonly number[]
 }
 
 export function createEmptyCsvColumnMapping(): CsvColumnMapping {
@@ -67,5 +69,5 @@ export function deriveMappedCsvPreview(
   })
   const rows = products.map((product) => fields.map(({ key }) => product[key]))
 
-  return { fields, rows, products }
+  return { fields, rows, products, sourceLines: preview.sourceLines }
 }

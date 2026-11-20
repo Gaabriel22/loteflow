@@ -7,6 +7,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { CsvReportExport } from "@/components/csv-report-export"
 import { CsvFindingsFilters } from "@/components/csv-findings-filters"
+import { HeaderFindingsTable } from "@/components/header-findings-table"
+import {
+  SEVERITY_LABELS,
+  type HeaderFinding,
+} from "@/domain/product-validation/types"
+import { getSourceColumnLabel } from "@/domain/source-location"
 import {
   filterFindings,
   type FindingsFilter,
@@ -36,7 +42,9 @@ function getScopeMessage(analyzedCount: number, totalRecordCount: number) {
   const unexaminedCount = Math.max(totalRecordCount - analyzedCount, 0)
 
   if (analyzedCount === 0) {
-    return "O arquivo não tem registros para analisar."
+    return totalRecordCount === 0
+      ? "O arquivo não tem registros para analisar."
+      : "Nenhum registro de dados foi analisado. Mapeie campos para aplicar regras de produto; os avisos de cabeçalho continuam disponíveis."
   }
 
   const recordWord = analyzedCount === 1 ? "registro" : "registros"
@@ -99,7 +107,7 @@ function ValidationFindingsTable({
         <TableBody className="divide-y divide-border">
           {validation.records
             .slice(offset, end)
-            .map(({ product, recordIndex, findings }) => (
+            .map(({ product, recordIndex, sourceLine, findings }) => (
               <TableRow className="align-top" key={recordIndex}>
                 <TableHead
                   className="px-4 py-3 font-medium tabular-nums text-foreground"
@@ -117,15 +125,33 @@ function ValidationFindingsTable({
                 ))}
                 <TableCell className="px-4 py-3">
                   <ul className="grid gap-2">
-                    {findings.map(({ field, message }) => (
-                      <li
-                        className="flex flex-wrap items-center gap-2 leading-5"
-                        key={`${field}-${message}`}
-                      >
-                        <Badge variant="outline">{field}</Badge>
-                        <span className="text-muted-foreground">{message}</span>
-                      </li>
-                    ))}
+                    {findings.map(
+                      ({ field, message, severity, code, columnIndex }) => (
+                        <li
+                          className="flex flex-wrap items-center gap-2 leading-5"
+                          key={`${field}-${code}`}
+                        >
+                          <Badge variant="outline">{field}</Badge>
+                          <Badge
+                            variant={
+                              severity === "error" ? "destructive" : "outline"
+                            }
+                          >
+                            {SEVERITY_LABELS[severity]}
+                          </Badge>
+                          <span className="text-muted-foreground">
+                            {message}
+                          </span>
+                          <span className="basis-full text-xs text-muted-foreground">
+                            Linha de origem: {sourceLine ?? "não informada"}.
+                            Coluna de origem:{" "}
+                            {getSourceColumnLabel(columnIndex) ||
+                              "linha inteira"}
+                            .
+                          </span>
+                        </li>
+                      ),
+                    )}
                   </ul>
                 </TableCell>
               </TableRow>
@@ -145,19 +171,31 @@ function ValidationFindingsTable({
 export function CsvValidationResults({
   mappedPreview,
   totalRecordCount,
+  requiredFields,
+  headerFindings,
 }: {
   mappedPreview: MappedCsvPreview
   totalRecordCount: number
+  requiredFields: readonly ProductField[]
+  headerFindings: HeaderFinding[]
 }) {
   const [filter, setFilter] = useState<FindingsFilter>({ field: "", query: "" })
   const deferredFilter = useDeferredValue(filter)
   const validation = useMemo(
     () =>
-      validateProducts(
-        mappedPreview.products,
-        mappedPreview.fields.map(({ key }) => key),
-      ),
-    [mappedPreview],
+      validateProducts(mappedPreview.products, {
+        mappedFields: mappedPreview.fields.map(({ key }) => key),
+        requiredFields,
+        headerFindings,
+        sourceLines: mappedPreview.sourceLines,
+        columnIndexes: Object.fromEntries(
+          mappedPreview.fields.map(({ key, columnIndex }) => [
+            key,
+            columnIndex,
+          ]),
+        ),
+      }),
+    [mappedPreview, requiredFields, headerFindings],
   )
   const visibleValidation = useMemo(
     () => filterFindings(validation, deferredFilter),
@@ -177,8 +215,10 @@ export function CsvValidationResults({
           Validação genérica do arquivo
         </h3>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          As regras se aplicam somente aos campos mapeados e não alteram os
-          valores.
+          Regras de produto se aplicam somente aos campos mapeados. Avisos de
+          cabeçalho são independentes. Erro indica descumprimento da regra
+          genérica; Aviso pede atenção. Nenhum deles garante aceitação ou
+          rejeição por ERP.
         </p>
       </div>
 
@@ -197,7 +237,9 @@ export function CsvValidationResults({
       >
         Registros analisados: {formatCount(validation.recordCount)}. Registros
         para revisar: {formatCount(validation.affectedRecordCount)}.
-        Apontamentos: {formatCount(validation.findingCount)}.
+        Apontamentos: {formatCount(validation.findingCount)}. Erros:{" "}
+        {formatCount(validation.errorCount)}. Avisos:{" "}
+        {formatCount(validation.warningCount)}.
       </p>
 
       {deferredFilter !== filter && (
@@ -215,6 +257,7 @@ export function CsvValidationResults({
       <CsvFindingsFilters
         fields={mappedPreview.fields}
         filter={filter}
+        hasHeaderFindings={headerFindings.length > 0}
         onChange={setFilter}
       />
       <p
@@ -229,19 +272,20 @@ export function CsvValidationResults({
         {formatCount(validation.findingCount)}.
       </p>
 
+      <HeaderFindingsTable findings={visibleValidation.headerFindings} />
       {visibleValidation.records.length > 0 ? (
         <ValidationFindingsTable
-          key={`${deferredFilter.field}:${deferredFilter.query}`}
+          key={`${deferredFilter.field}:${deferredFilter.query}:${deferredFilter.severity ?? ""}`}
           fields={mappedPreview.fields}
           validation={visibleValidation}
         />
-      ) : (
+      ) : visibleValidation.headerFindings.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           {validation.findingCount === 0
             ? "Nenhum apontamento nos registros analisados."
             : "Nenhum apontamento corresponde aos filtros. Limpe os filtros para consultar a lista completa."}
         </p>
-      )}
+      ) : null}
     </section>
   )
 }

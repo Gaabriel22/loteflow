@@ -10,15 +10,18 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { FindingsFilter } from "@/domain/product-validation/filter-findings"
+import type { FindingSeverity } from "@/domain/product-validation/types"
 
 export function CsvFindingsFilters({
   fields,
   filter,
   onChange,
+  hasHeaderFindings = false,
 }: {
   fields: readonly { label: string }[]
   filter: FindingsFilter
   onChange: (filter: FindingsFilter) => void
+  hasHeaderFindings?: boolean
 }) {
   return (
     <div className="grid min-w-0 gap-3">
@@ -49,11 +52,50 @@ export function CsvFindingsFilters({
               <SelectGroup>
                 <SelectItem value="__all__">Todos os campos</SelectItem>
                 <SelectItem value="Linha">Linha</SelectItem>
+                {hasHeaderFindings && (
+                  <SelectItem value="Cabeçalho">Cabeçalho</SelectItem>
+                )}
                 {fields.map(({ label }) => (
                   <SelectItem key={label} value={label}>
                     {label}
                   </SelectItem>
                 ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="csv-findings-severity">
+            Filtrar por severidade
+          </FieldLabel>
+          <Select
+            value={filter.severity || "__all__"}
+            onValueChange={(value) =>
+              onChange({
+                ...filter,
+                severity:
+                  value === "__all__" || value === null
+                    ? ""
+                    : (value as FindingSeverity),
+              })
+            }
+          >
+            <SelectTrigger className="w-full" id="csv-findings-severity">
+              <SelectValue>
+                {(value) =>
+                  value === "error"
+                    ? "Erros"
+                    : value === "warning"
+                      ? "Avisos"
+                      : "Todas as severidades"
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent alignItemWithTrigger={false}>
+              <SelectGroup>
+                <SelectItem value="__all__">Todas as severidades</SelectItem>
+                <SelectItem value="error">Erros</SelectItem>
+                <SelectItem value="warning">Avisos</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -83,8 +125,10 @@ export function CsvFindingsFilters({
       </p>
       <Button
         className="justify-self-start"
-        disabled={filter.field === "" && filter.query === ""}
-        onClick={() => onChange({ field: "", query: "" })}
+        disabled={
+          filter.field === "" && filter.query === "" && !filter.severity
+        }
+        onClick={() => onChange({ field: "", query: "", severity: "" })}
         type="button"
         variant="outline"
       >

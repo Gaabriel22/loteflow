@@ -4,7 +4,7 @@
 Permitir baixar no navegador um relatório CSV dos apontamentos atuais da prévia, com escopo explícito, proteção contra fórmulas e preservação dos dados da página.
 ## Requirements
 ### Requirement: Baixar relatório dos apontamentos atuais
-A aplicação MUST oferecer download CSV local quando o documento mapeado tiver apontamentos. MUST gerar uma linha por apontamento, com registro base 1, campo, mensagem, quantidade analisada, total do arquivo e valores dos campos mapeados em ordem. MUST usar os valores atuais após edições, restaurações e mudanças de mapeamento. MUST desabilitar o botão quando não houver apontamentos.
+A aplicação MUST oferecer download CSV local quando houver apontamentos de dados ou cabeçalho, inclusive sem campos mapeados ou registros de dados. MUST gerar uma linha por apontamento, com registro base 1, campo, mensagem, quantidade analisada, total do arquivo e valores dos campos mapeados em ordem, severidade, linha e coluna de origem. Avisos de cabeçalho MUST usar registro vazio e linha 1, sem inventar produto. MUST usar os valores atuais após edições, restaurações e mudanças de mapeamento ou configuração de obrigatoriedade. MUST desabilitar o botão quando não houver apontamentos.
 
 #### Scenario: Exportar revisão da prévia
 - **WHEN** a pessoa solicita o relatório com apontamentos presentes
@@ -15,7 +15,7 @@ A aplicação MUST oferecer download CSV local quando o documento mapeado tiver 
 - **THEN** o relatório reflete a validação e os valores atuais da cópia de trabalho
 
 #### Scenario: Não há apontamentos
-- **WHEN** nenhum registro analisado possui apontamentos
+- **WHEN** não há apontamentos de dados nem de cabeçalho
 - **THEN** o botão fica desabilitado e a interface explica o motivo
 
 ### Requirement: Explicitar escopo e proteger conteúdo do relatório
@@ -39,4 +39,3 @@ A serialização MUST ocorrer em Worker, com estado de geração e cancelamento.
 #### Scenario: Falha no download
 - **WHEN** o navegador não consegue iniciar a geração ou download
 - **THEN** uma mensagem orienta tentar novamente e a ação permanece disponível
-

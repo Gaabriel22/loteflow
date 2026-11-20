@@ -50,6 +50,9 @@ describe("validateProducts", () => {
       {
         field: "GTIN",
         message: "Confira os dígitos verificadores do GTIN informado.",
+        code: "invalid-gtin",
+        severity: "error",
+        columnIndex: null,
       },
     ])
   })
@@ -74,7 +77,13 @@ describe("validateProducts", () => {
     )
 
     expect(validation.records[0]?.findings).toEqual([
-      { field: "Linha", message: "Esta linha não contém dados." },
+      {
+        field: "Linha",
+        message: "Esta linha não contém dados.",
+        code: "empty-row",
+        severity: "warning",
+        columnIndex: null,
+      },
     ])
   })
 

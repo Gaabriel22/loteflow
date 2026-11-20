@@ -6,6 +6,7 @@ export type CsvDocument = {
   totalRecordCount: number
   malformedRecordCount: number
   columnCount: number
+  sourceLines?: number[]
 }
 export type CsvPreview = CsvDocument
 export type CsvParseIssue =

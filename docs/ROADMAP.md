@@ -8,7 +8,7 @@ Landing page, demonstração fictícia, leitura local de CSV e XLSX com seleçã
 
 ## Changes previstas
 
-A estimativa inicial foi de 12 changes. As etapas 1, `leitura-csv-completa`, 2, `processamento-integral-csv`, 3, `paginacao-revisao-registros`, e 4, `importacao-xlsx-local`, estão arquivadas. Restam **8 próximas changes**, mais uma opcional para analytics. A divisão pode mudar conforme os requisitos forem detalhados no OpenSpec; os demais nomes abaixo são sugestões, não changes já criadas.
+A estimativa inicial foi de 12 changes. As etapas 1, `leitura-csv-completa`, 2, `processamento-integral-csv`, 3, `paginacao-revisao-registros`, 4, `importacao-xlsx-local`, e 5, `validacoes-genericas-completas`, estão arquivadas. A revisão inclui cabeçalhos repetidos, obrigatoriedade configurável, severidade e localização de origem. Restam **7 próximas changes**, mais uma opcional para analytics. A divisão pode mudar conforme os requisitos forem detalhados no OpenSpec; os demais nomes abaixo são sugestões, não changes já criadas.
 
 | Ordem | Change sugerida                  | Resultado esperado                                                                                                                    |
 | ----- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -53,4 +53,4 @@ Decisão de 17/11/2026: hospedar na **Cloudflare**. A etapa `preparacao-publicac
 
 ## Como continuar
 
-Próxima etapa: `validacoes-genericas-completas`. Manter cada entrega no fluxo OpenSpec: proposta, especificações, implementação, verificação, sincronização e arquivamento. Atualizar este roteiro conforme as etapas forem concluídas ou o escopo mudar.
+Próxima etapa: `perfis-validacao`. Manter cada entrega no fluxo OpenSpec: proposta, especificações, implementação, verificação, sincronização e arquivamento. Atualizar este roteiro conforme as etapas forem concluídas ou o escopo mudar.

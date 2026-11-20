@@ -33,6 +33,9 @@ describe("CSV findings report", () => {
       "Informe um preço numérico.",
       "1",
       "105",
+      "Erro",
+      "",
+      "",
       "00001",
       'inválido;\n"texto"',
     ])

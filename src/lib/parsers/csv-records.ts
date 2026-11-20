@@ -4,11 +4,18 @@ import type { CsvParseIssue, CsvParseOutcome } from "./csv-types"
 export function createCsvRecordCollector(limits: CsvImportLimits) {
   let headers: string[] | null = null
   const rows: string[][] = []
+  const sourceLines: number[] = []
+  let hasSourceLines = true
   let columnCount = 0
   let malformedRecordCount = 0
   let issue: CsvParseIssue | null = null
 
-  function addRecord(row: string[], hasParsingErrors: boolean): boolean {
+  function addRecord(
+    row: string[],
+    metadata: boolean | { hasParsingErrors: boolean; sourceLine: number },
+  ): boolean {
+    const hasParsingErrors =
+      typeof metadata === "boolean" ? metadata : metadata.hasParsingErrors
     if (issue) return false
     if (row.length > limits.maxColumns) {
       issue = "too-many-columns"
@@ -28,6 +35,8 @@ export function createCsvRecordCollector(limits: CsvImportLimits) {
       return false
     }
     rows.push([...row])
+    if (typeof metadata === "boolean") hasSourceLines = false
+    else sourceLines.push(metadata.sourceLine)
     if (hasParsingErrors || row.length !== headers.length)
       malformedRecordCount += 1
     return true
@@ -44,6 +53,7 @@ export function createCsvRecordCollector(limits: CsvImportLimits) {
         totalRecordCount: rows.length,
         malformedRecordCount,
         columnCount,
+        ...(hasSourceLines ? { sourceLines } : {}),
       },
     }
   }

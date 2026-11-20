@@ -124,6 +124,18 @@ test("pagina apontamentos, reinicia com filtros e limita página quando lista en
   await expect(
     results.getByRole("rowheader", { name: "201", exact: true }),
   ).toBeVisible()
+  const severity = page.getByRole("combobox", {
+    name: "Filtrar por severidade",
+    exact: true,
+  })
+  await severity.click()
+  await page.getByRole("option", { name: "Avisos", exact: true }).click()
+  await expect(results.getByRole("table")).toHaveCount(0)
+  await severity.click()
+  await page.getByRole("option", { name: "Erros", exact: true }).click()
+  await expect(
+    results.getByRole("rowheader", { name: "1", exact: true }),
+  ).toBeVisible()
   const search = page.getByLabel("Buscar nos apontamentos", { exact: true })
   await search.fill("numerico")
   await expect(

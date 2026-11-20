@@ -6,7 +6,7 @@ import {
 } from "../product-validation"
 import type { SampleProduct } from "./products"
 
-export type SampleFinding = ProductFinding
+export type SampleFinding = Pick<ProductFinding, "field" | "message">
 
 export type SampleLineResult = {
   lineNumber: number
@@ -38,7 +38,7 @@ export function validateSampleProducts(
     lines: validation.records.map(({ product, recordIndex, findings }) => ({
       product,
       lineNumber: recordIndex + 2,
-      findings,
+      findings: findings.map(({ field, message }) => ({ field, message })),
     })),
   }
 }
